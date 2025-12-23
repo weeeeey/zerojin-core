@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from 'react'
  * Storage 이벤트를 위한 커스텀 이벤트 디스패처
  * 같은 탭 내에서 스토리지 변경사항을 동기화하기 위해 사용
  */
-function dispatchStorageEvent(key: string, newValue: string | null) {
+function dispatchStorageEvent(key: string, newValue: string | null, storage: Storage) {
   window.dispatchEvent(
     new StorageEvent('storage', {
       key,
       newValue,
-      storageArea: typeof window !== 'undefined' ? window.localStorage : null,
+      storageArea: storage,
+      url: window.location.href,
     })
   )
 }
@@ -70,7 +71,7 @@ export function createStorageHook(storage: Storage) {
           setStoredValue(newValue)
 
           // 같은 탭 내 다른 컴포넌트에 알림
-          dispatchStorageEvent(key, JSON.stringify(newValue))
+          dispatchStorageEvent(key, JSON.stringify(newValue), storage)
         } catch (error) {
           console.error(`Error setting ${key} in storage:`, error)
         }
@@ -90,7 +91,7 @@ export function createStorageHook(storage: Storage) {
       try {
         storage.removeItem(key)
         setStoredValue(initialValue)
-        dispatchStorageEvent(key, null)
+        dispatchStorageEvent(key, null, storage)
       } catch (error) {
         console.error(`Error removing ${key} from storage:`, error)
       }
