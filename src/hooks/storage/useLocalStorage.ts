@@ -1,4 +1,4 @@
-import { createStorageHook } from './createStorageHook'
+import { createStorageHook } from './createStorageHook';
 
 /**
  * localStorage에 상태를 동기화하는 React 훅
@@ -71,5 +71,5 @@ import { createStorageHook } from './createStorageHook'
  * ```
  */
 export const useLocalStorage = createStorageHook(
-  typeof window !== 'undefined' ? window.localStorage : ({} as Storage)
-)
+    typeof window !== 'undefined' ? window.localStorage : ({} as Storage)
+);

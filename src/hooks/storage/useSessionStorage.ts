@@ -1,4 +1,4 @@
-import { createStorageHook } from './createStorageHook'
+import { createStorageHook } from './createStorageHook';
 
 /**
  * sessionStorage에 상태를 동기화하는 React 훅
@@ -81,5 +81,5 @@ import { createStorageHook } from './createStorageHook'
  * ```
  */
 export const useSessionStorage = createStorageHook(
-  typeof window !== 'undefined' ? window.sessionStorage : ({} as Storage)
-)
+    typeof window !== 'undefined' ? window.sessionStorage : ({} as Storage)
+);
