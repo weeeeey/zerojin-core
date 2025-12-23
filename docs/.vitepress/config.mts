@@ -28,7 +28,10 @@ export default defineConfig({
           items: [
             { text: '개요', link: '/api/hooks/' },
             { text: 'useDebounce', link: '/api/hooks/useDebounce' },
-            { text: 'useThrottle', link: '/api/hooks/useThrottle' }
+            { text: 'useThrottle', link: '/api/hooks/useThrottle' },
+            { text: 'useLocalStorage', link: '/api/hooks/useLocalStorage' },
+            { text: 'useSessionStorage', link: '/api/hooks/useSessionStorage' },
+            { text: 'useBroadcastChannel', link: '/api/hooks/useBroadcastChannel' }
           ]
         }
       ]
