@@ -8,7 +8,8 @@ zerojin은 기본적인 구현을 넘어서는 고급 기능을 갖춘 프로덕
 
 | 훅 | 설명 | 사용 사례 |
 |------|-------------|----------|
-| [useDebounce](/api/hooks/useDebounce) | 활동이 없을 때까지 실행을 지연 | 검색 입력, 폼 유효성 검사 |
+| [useDebounce](/api/hooks/useDebounce) | 활동이 없을 때까지 실행을 지연 | 이벤트 핸들러, 콜백 함수 |
+| [useInputDebounce](/api/hooks/useInputDebounce) | Input 값을 즉시 반영하고 debounced 값 제공 | 검색 입력, 폼 유효성 검사, 자동 저장 |
 | [useThrottle](/api/hooks/useThrottle) | 일정 시간당 한 번만 실행 | 스크롤 이벤트, 마우스 추적 |
 
 ### 스토리지
@@ -145,7 +146,8 @@ const handleSave = useDebounce(
 ## 다음 단계
 
 ### 속도 제한 훅
-- [useDebounce API](/api/hooks/useDebounce) - 예제를 포함한 완전한 문서
+- [useDebounce API](/api/hooks/useDebounce) - 함수 debounce 완전한 문서
+- [useInputDebounce API](/api/hooks/useInputDebounce) - Input debounce 완전한 문서
 - [useThrottle API](/api/hooks/useThrottle) - 예제를 포함한 완전한 문서
 
 ### 스토리지 훅
