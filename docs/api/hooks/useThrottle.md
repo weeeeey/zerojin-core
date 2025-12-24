@@ -293,16 +293,16 @@ processData({ invalid: true })  // ❌ 타입 에러
 ## 언제 사용하지 말아야 할까
 
 ❌ **최종 값만 필요한 경우**
-- 검색 입력에는 `useDebounce` 사용
-- 폼 유효성 검사에는 `useDebounce` 사용
+- 검색 입력에는 `useDebounce` 또는 `useDebouncedCallback` 사용
+- 폼 유효성 검사에는 `useDebouncedCallback` 사용
 
 ❌ **일회성 이벤트의 경우**
 - 함수를 직접 호출하세요
 
 ## Debounce vs Throttle
 
-| 시나리오 | useThrottle | useDebounce |
-|----------|-------------|-------------|
+| 시나리오 | useThrottle | useDebounce / useDebouncedCallback |
+|----------|-------------|-------------------------------------|
 | 스크롤 추적 | ✅ 주기적으로 업데이트 | ❌ 끝에서만 실행 |
 | 검색 입력 | ❌ 입력 중에도 검색 | ✅ 입력이 멈출 때까지 대기 |
 | 속도 제한 | ✅ 최대 속도 보장 | ❌ 예측 불가능한 타이밍 |
@@ -350,5 +350,6 @@ processData({ invalid: true })  // ❌ 타입 에러
 
 ## 참고
 
-- [useDebounce](/api/hooks/useDebounce) - 활동이 없을 때까지 지연
+- [useDebounce](/api/hooks/useDebounce) - 값 디바운싱
+- [useDebouncedCallback](/api/hooks/useDebouncedCallback) - 함수 디바운싱
 - [훅 개요](/api/hooks/) - 사용 가능한 모든 훅

@@ -8,7 +8,8 @@ zerojin은 기본적인 구현을 넘어서는 고급 기능을 갖춘 프로덕
 
 | 훅 | 설명 | 사용 사례 |
 |------|-------------|----------|
-| [useDebounce](/api/hooks/useDebounce) | 활동이 없을 때까지 실행을 지연 | 이벤트 핸들러, 콜백 함수 |
+| [useDebounce](/api/hooks/useDebounce) | 값이 변경된 후 delay까지 업데이트 지연 | 검색 입력, 필터링, 자동 저장 |
+| [useDebouncedCallback](/api/hooks/useDebouncedCallback) | 함수 실행을 지연시키는 디바운스 함수 생성 | 이벤트 핸들러, 콜백 함수 |
 | [useInputDebounce](/api/hooks/useInputDebounce) | Input 값을 즉시 반영하고 debounced 값 제공 | 검색 입력, 폼 유효성 검사, 자동 저장 |
 | [useThrottle](/api/hooks/useThrottle) | 일정 시간당 한 번만 실행 | 스크롤 이벤트, 마우스 추적 |
 
@@ -35,13 +36,13 @@ zerojin은 기본적인 구현을 넘어서는 고급 기능을 갖춘 프로덕
 
 ```tsx
 // delay 후에 실행 (trailing)
-useDebounce(callback, 500, { leading: false, trailing: true })
+useDebouncedCallback(callback, 500, { leading: false, trailing: true })
 
 // 즉시 실행 (leading)
 useThrottle(callback, 500, { leading: true, trailing: false })
 
 // 둘 다 실행 (leading + trailing)
-useDebounce(callback, 500, { leading: true, trailing: true })
+useDebouncedCallback(callback, 500, { leading: true, trailing: true })
 ```
 
 ### 2. Cancel & Flush 메서드
@@ -49,7 +50,7 @@ useDebounce(callback, 500, { leading: true, trailing: true })
 대기 중인 실행을 제어:
 
 ```tsx
-const debouncedFn = useDebounce(callback, 500)
+const debouncedFn = useDebouncedCallback(callback, 500)
 
 // 대기 중인 실행 취소
 debouncedFn.cancel()
@@ -66,7 +67,7 @@ debouncedFn.flush()
 function Component() {
   const [count, setCount] = useState(0)
 
-  const handleClick = useDebounce(
+  const handleClick = useDebouncedCallback(
     () => {
       // 항상 최신 count 값을 로그
       console.log(count)
@@ -84,7 +85,7 @@ function Component() {
 `Parameters<T>` 및 `ReturnType<T>`를 통한 완전한 타입 추론:
 
 ```tsx
-const calculate = useDebounce(
+const calculate = useDebouncedCallback(
   (a: number, b: number): number => a + b,
   300
 )
@@ -97,11 +98,12 @@ calculate('wrong', 10)   // ❌ 컴파일 에러
 
 | 시나리오 | 훅 | 이유 |
 |----------|------|-----|
-| 검색 입력 | useDebounce | 사용자가 입력을 멈출 때까지 대기 |
-| 폼 유효성 검사 | useDebounce | 사용자가 입력을 마친 후 유효성 검사 |
+| 검색 입력 (값) | useDebounce | 입력 값이 안정화될 때까지 대기 |
+| 검색 입력 (함수) | useDebouncedCallback | API 호출 함수를 디바운스 |
+| 폼 유효성 검사 | useDebouncedCallback | 유효성 검사 함수를 디바운스 |
 | 스크롤 추적 | useThrottle | 주기적으로 위치 업데이트 |
 | 윈도우 리사이즈 | useThrottle | 주기적으로 레이아웃 재계산 |
-| 버튼 스팸 | useDebounce (leading) | 첫 클릭만 실행 |
+| 버튼 스팸 | useDebouncedCallback (leading) | 첫 클릭만 실행 |
 | API 속도 제한 | useThrottle | 초당 최대 N개 요청 |
 | 사용자 설정 저장 | useLocalStorage | 브라우저를 닫아도 유지 |
 | 임시 폼 데이터 | useSessionStorage | 탭을 닫으면 자동 삭제 |
@@ -146,9 +148,10 @@ const handleSave = useDebounce(
 ## 다음 단계
 
 ### 속도 제한 훅
-- [useDebounce API](/api/hooks/useDebounce) - 함수 debounce 완전한 문서
-- [useInputDebounce API](/api/hooks/useInputDebounce) - Input debounce 완전한 문서
-- [useThrottle API](/api/hooks/useThrottle) - 예제를 포함한 완전한 문서
+- [useDebounce API](/api/hooks/useDebounce) - 값 디바운싱 완전한 문서
+- [useDebouncedCallback API](/api/hooks/useDebouncedCallback) - 함수 디바운싱 완전한 문서
+- [useInputDebounce API](/api/hooks/useInputDebounce) - Input 디바운싱 완전한 문서
+- [useThrottle API](/api/hooks/useThrottle) - 쓰로틀링 예제를 포함한 완전한 문서
 
 ### 스토리지 훅
 - [useLocalStorage API](/api/hooks/useLocalStorage) - 영구 저장 및 탭 간 동기화

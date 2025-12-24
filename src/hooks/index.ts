@@ -1,4 +1,5 @@
 export { useDebouncedCallback } from './useDebouncedCallback';
+export { useDebounce } from './useDebounce';
 export { useInputDebounce } from './useInputDebounce';
 export { useThrottle } from './useThrottle';
 export { useLocalStorage } from './storage/useLocalStorage';

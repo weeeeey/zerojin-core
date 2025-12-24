@@ -318,13 +318,13 @@ const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
 // debouncedQuery는 500ms 후 업데이트 → API 호출에 사용
 ```
 
-### 2. 내부적으로 useDebounce 활용
+### 2. 안정적인 디바운스 로직
 
-`useDebounce`의 모든 기능(cancel, flush, stale closure 방지)을 상속:
+검증되고 안정적인 디바운스 구현:
 
 ```tsx
-// useInputDebounce는 내부적으로 useDebounce를 사용하여
-// 검증되고 안정적인 debounce 로직을 재사용합니다
+// useInputDebounce는 검증된 디바운스 로직을 사용하여
+// 안정적으로 값을 업데이트합니다
 ```
 
 ### 3. TypeScript 완벽 지원
@@ -370,35 +370,35 @@ const [user, debouncedUser, setUser] = useInputDebounce<User>({
   - `useState`만 사용
 
 - **더 세밀한 제어가 필요한 경우** (leading/trailing, cancel, flush)
-  - `useDebounce` 직접 사용
+  - `useDebouncedCallback` 사용
 
 - **throttle이 더 적합한 경우** (스크롤, 리사이즈)
   - `useThrottle` 사용
 
-## useDebounce vs useInputDebounce
+## useDebounce vs useDebouncedCallback vs useInputDebounce
 
-| 특성 | useDebounce | useInputDebounce |
-|------|-------------|------------------|
-| **용도** | 함수 debounce | Input 값 debounce |
-| **반환값** | Debounced 함수 | [value, debouncedValue, setValue] |
-| **제어** | cancel, flush 메서드 제공 | 자동 debounce만 제공 |
-| **사용 예** | 이벤트 핸들러, 콜백 | input, textarea, 폼 필드 |
-| **복잡도** | 더 많은 제어 가능 | 간단하고 직관적 |
+| 특성 | useDebounce | useDebouncedCallback | useInputDebounce |
+|------|-------------|---------------------|------------------|
+| **용도** | 값 debounce | 함수 debounce | Input 값 debounce |
+| **반환값** | Debounced 값 | Debounced 함수 | [value, debouncedValue, setValue] |
+| **제어** | 자동 | cancel, flush 메서드 제공 | 자동 debounce만 제공 |
+| **사용 예** | 상태 값 | 이벤트 핸들러, 콜백 | input, textarea, 폼 필드 |
+| **복잡도** | 간단 | 더 많은 제어 가능 | 간단하고 직관적 |
 
 ## 사용 사례 비교
 
-| 시나리오 | useDebounce | useInputDebounce |
-|---------|-------------|------------------|
-| 검색 입력 자동완성 | ❌ | ✅ |
-| 버튼 클릭 보호 | ✅ | ❌ |
-| 스크롤 이벤트 | ✅ | ❌ |
-| 폼 자동 저장 | ❌ | ✅ |
-| API 호출 최적화 (input) | ❌ | ✅ |
-| 윈도우 리사이즈 | ✅ | ❌ |
+| 시나리오 | useDebounce | useDebouncedCallback | useInputDebounce |
+|---------|-------------|---------------------|------------------|
+| 검색 입력 자동완성 | ✅ | ❌ | ✅ |
+| 버튼 클릭 보호 | ❌ | ✅ | ❌ |
+| 스크롤 이벤트 | ❌ | ✅ | ❌ |
+| 폼 자동 저장 | ✅ | ❌ | ✅ |
+| API 호출 최적화 (input) | ✅ | ❌ | ✅ |
+| 윈도우 리사이즈 | ❌ | ✅ | ❌ |
 
 ## 구현 세부사항
 
-- **useDebounce 재사용**: 검증된 `useDebounce` 로직 활용
+- **검증된 로직**: 안정적인 debounce 구현 활용
 - **즉각적인 상태**: `value`는 즉시 업데이트로 UI 반응성 보장
 - **자동 정리**: 컴포넌트 언마운트 시 자동으로 타이머 정리
 - **메모리 효율**: 최소한의 상태만 관리
@@ -406,6 +406,7 @@ const [user, debouncedUser, setUser] = useInputDebounce<User>({
 
 ## 참고
 
-- [useDebounce](/api/hooks/useDebounce) - 함수 debounce
-- [useThrottle](/api/hooks/useThrottle) - 함수 throttle
+- [useDebounce](/api/hooks/useDebounce) - 값 디바운싱
+- [useDebouncedCallback](/api/hooks/useDebouncedCallback) - 함수 디바운싱
+- [useThrottle](/api/hooks/useThrottle) - 함수 쓰로틀링
 - [훅 개요](/api/hooks/) - 사용 가능한 모든 훅
