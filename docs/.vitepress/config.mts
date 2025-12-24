@@ -14,7 +14,10 @@ export default defineConfig({
                     {
                         text: '소개',
                         items: [
-                            { text: '시작하기', link: '/guide/getting-started' },
+                            {
+                                text: '시작하기',
+                                link: '/guide/getting-started',
+                            },
                             { text: '설치', link: '/guide/installation' },
                         ],
                     },
@@ -27,12 +30,18 @@ export default defineConfig({
                         text: '훅',
                         items: [
                             { text: '개요', link: '/api/hooks/' },
-                            { text: 'useDebounce', link: '/api/hooks/useDebounce' },
+                            {
+                                text: 'useDebouncedCallback',
+                                link: '/api/hooks/useDebouncedCallback',
+                            },
                             {
                                 text: 'useInputDebounce',
                                 link: '/api/hooks/useInputDebounce',
                             },
-                            { text: 'useThrottle', link: '/api/hooks/useThrottle' },
+                            {
+                                text: 'useThrottle',
+                                link: '/api/hooks/useThrottle',
+                            },
                             {
                                 text: 'useLocalStorage',
                                 link: '/api/hooks/useLocalStorage',

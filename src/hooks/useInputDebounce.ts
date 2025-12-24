@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useDebounce } from './useDebounce';
+import { useDebouncedCallback } from './useDebouncedCallback';
 
 /**
  * Creates a debounced input value with immediate state updates.
@@ -93,7 +93,7 @@ export function useInputDebounce<T>(
         setDebouncedValue(newValue);
     }, []);
 
-    const debouncedUpdate = useDebounce(updateDebouncedValue, delay);
+    const debouncedUpdate = useDebouncedCallback(updateDebouncedValue, delay);
 
     // Update debounced value when value changes
     useEffect(() => {
