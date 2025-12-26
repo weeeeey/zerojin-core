@@ -1,55 +1,68 @@
-import { useState } from 'react'
-import DebounceExample from './examples/DebounceExample'
-import ThrottleExample from './examples/ThrottleExample'
-import LocalStorageExample from './examples/LocalStorageExample'
-import SessionStorageExample from './examples/SessionStorageExample'
-import './App.css'
+import { useState } from 'react';
+import DebounceExample from './examples/DebounceExample';
+import ThrottleExample from './examples/ThrottleExample';
+import LocalStorageExample from './examples/LocalStorageExample';
+import SessionStorageExample from './examples/SessionStorageExample';
+import './App.css';
+import DndGridExample from './examples/DndGridExample';
 
-type Tab = 'debounce' | 'throttle' | 'localStorage' | 'sessionStorage'
+type Tab =
+    | 'debounce'
+    | 'throttle'
+    | 'localStorage'
+    | 'sessionStorage'
+    | 'DndGrid';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('debounce')
+    const [activeTab, setActiveTab] = useState<Tab>('DndGrid');
 
-  return (
-    <div className="app">
-      <header className="header">
-        <h1>zerojin Playground</h1>
-        <p>React 훅 실시간 테스트 환경</p>
-      </header>
+    return (
+        <div className="app">
+            <header className="header">
+                <h1>zerojin Playground</h1>
+                <p>React 훅 실시간 테스트 환경</p>
+            </header>
 
-      <nav className="tabs">
-        <button
-          className={activeTab === 'debounce' ? 'active' : ''}
-          onClick={() => setActiveTab('debounce')}
-        >
-          useDebounce
-        </button>
-        <button
-          className={activeTab === 'throttle' ? 'active' : ''}
-          onClick={() => setActiveTab('throttle')}
-        >
-          useThrottle
-        </button>
-        <button
-          className={activeTab === 'localStorage' ? 'active' : ''}
-          onClick={() => setActiveTab('localStorage')}
-        >
-          useLocalStorage
-        </button>
-        <button
-          className={activeTab === 'sessionStorage' ? 'active' : ''}
-          onClick={() => setActiveTab('sessionStorage')}
-        >
-          useSessionStorage
-        </button>
-      </nav>
+            <nav className="tabs">
+                <button
+                    className={activeTab === 'DndGrid' ? 'active' : ''}
+                    onClick={() => setActiveTab('DndGrid')}
+                >
+                    DndGrid
+                </button>
+                <button
+                    className={activeTab === 'debounce' ? 'active' : ''}
+                    onClick={() => setActiveTab('debounce')}
+                >
+                    useDebounce
+                </button>
+                <button
+                    className={activeTab === 'throttle' ? 'active' : ''}
+                    onClick={() => setActiveTab('throttle')}
+                >
+                    useThrottle
+                </button>
+                <button
+                    className={activeTab === 'localStorage' ? 'active' : ''}
+                    onClick={() => setActiveTab('localStorage')}
+                >
+                    useLocalStorage
+                </button>
+                <button
+                    className={activeTab === 'sessionStorage' ? 'active' : ''}
+                    onClick={() => setActiveTab('sessionStorage')}
+                >
+                    useSessionStorage
+                </button>
+            </nav>
 
-      <main className="content">
-        {activeTab === 'debounce' && <DebounceExample />}
-        {activeTab === 'throttle' && <ThrottleExample />}
-        {activeTab === 'localStorage' && <LocalStorageExample />}
-        {activeTab === 'sessionStorage' && <SessionStorageExample />}
-      </main>
-    </div>
-  )
+            <main className="content">
+                {activeTab === 'DndGrid' && <DndGridExample />}
+                {activeTab === 'debounce' && <DebounceExample />}
+                {activeTab === 'throttle' && <ThrottleExample />}
+                {activeTab === 'localStorage' && <LocalStorageExample />}
+                {activeTab === 'sessionStorage' && <SessionStorageExample />}
+            </main>
+        </div>
+    );
 }
