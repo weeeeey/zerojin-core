@@ -44,10 +44,10 @@ export interface DndGridContainerType {
     width: number;
     height: number;
     className?: string;
-    child: SPLIT | ITEM;
 }
 
 interface DefaultType {
+    id: number;
     width: number;
     // primary - 부모 split가 수평: width(부모), 수직: radio(부모)*width(부모),
     // secondary -          수평: width(부모), 수직: width(부모)-width(형제)
@@ -72,6 +72,6 @@ export interface DndGridSplitType extends DefaultType {
 
     ratio: number; // 0과 1사이의 숫자 (비율이 와야한다)
 
-    praimaryChild: DndGridNodeType;
+    primaryChild: DndGridNodeType;
     secondaryChild: DndGridNodeType;
 }
