@@ -41,9 +41,13 @@ export type DndSplitDirection = 'horizontality' | 'verticality';
 
 export interface DndGridContainerType {
     type: CONTAINER;
+
     width: number;
     height: number;
-    className?: string;
+
+    radio: 1;
+    top: 0;
+    left: 0;
 }
 
 interface DefaultType {
