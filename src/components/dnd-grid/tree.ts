@@ -1,8 +1,10 @@
+import { ComponentNode } from './util';
+
 type ITEM = 'item';
 type SPLIT = 'split';
 
 export type NodeType = ITEM | SPLIT;
-export type DndSplitDirection = 'horizontality' | 'verticality';
+export type DndSplitDirection = 'horizontal' | 'vertical';
 
 type ChildNode = GridItem | GridSplit;
 // Base Node class for common properties and methods
@@ -62,14 +64,14 @@ abstract class BaseNode {
 
         if (isPrimary) {
             // primary - 부모 split가 수평: width(부모), 수직: ratio(부모)*width(부모)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.width = parentSplit.width;
             } else {
                 this.width = parentSplit.ratio * parentSplit.width;
             }
         } else {
             // secondary - 수평: width(부모), 수직: width(부모)-width(형제)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.width = parentSplit.width;
             } else {
                 this.width = parentSplit.width - parentSplit.primaryChild.width;
@@ -82,14 +84,14 @@ abstract class BaseNode {
 
         if (isPrimary) {
             // primary: 부모 split가 수평: ratio(부모)*height(부모), 수직: height(부모)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.height = parentSplit.ratio * parentSplit.height;
             } else {
                 this.height = parentSplit.height;
             }
         } else {
             // secondary - 수평: height(부모)-height(형제), 수직: height(부모)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.height =
                     parentSplit.height - parentSplit.primaryChild.height;
             } else {
@@ -106,7 +108,7 @@ abstract class BaseNode {
             this.top = parentSplit.top;
         } else {
             // secondary - 수평: top(부모)+height(형제), 수직: top(부모)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.top = parentSplit.top + parentSplit.primaryChild.height;
             } else {
                 this.top = parentSplit.top;
@@ -122,7 +124,7 @@ abstract class BaseNode {
             this.left = parentSplit.left;
         } else {
             // secondary - 수평: left(부모), 수직: left(부모)+width(형제)
-            if (parentSplit.direction === 'horizontality') {
+            if (parentSplit.direction === 'horizontal') {
                 this.left = parentSplit.left;
             } else {
                 this.left = parentSplit.left + parentSplit.primaryChild.width;
@@ -276,47 +278,68 @@ export class GridContainer {
 }
 
 export class Tree {
-    private _root: GridContainer;
+    private _root: ChildNode;
 
-    constructor(width: number, height: number, node: ChildNode) {
-        this._root = new GridContainer(width, height);
-        this._root.child = node;
+    constructor(
+        containerWidth: number,
+        containerHeight: number,
+        componentsRootNode: ComponentNode
+    ) {
+        // 1단계: 트리 구조만 생성
+        this._root = this.buildFromComponentNode(componentsRootNode);
+
+        // 2단계: 루트 노드에 컨테이너 크기 직접 적용
+        this._root.width = containerWidth;
+        this._root.height = containerHeight;
+        this._root.top = 0;
+        this._root.left = 0;
+
+        // 3단계: 재귀적으로 자식들 레이아웃 계산
+        if (this._root.type === 'split') {
+            this.calculateLayout(this._root);
+        } else {
+            this._root.width = containerWidth;
+            this._root.height = containerHeight;
+        }
     }
 
-    get root(): GridContainer {
+    get root(): ChildNode {
         return this._root;
     }
 
-    set root(value: GridContainer) {
+    set root(value: ChildNode) {
         this._root = value;
     }
 
-    buildTree(nodes: ChildNode[]): void {
-        if (nodes.length < 1) return;
+    private buildFromComponentNode(node: ComponentNode): ChildNode {
+        if (node.type === 'item') {
+            return new GridItem(node.id);
+        } else {
+            // 재귀적으로 자식들도 변환
+            const primary = this.buildFromComponentNode(node.primary!);
+            const secondary = this.buildFromComponentNode(node.secondary!);
 
-        const dfs = (currentIdx: number) => {
-            const curNode = nodes[currentIdx];
-            if (curNode.type === 'item') {
-                return;
-            }
-            const nextPrimary = currentIdx * 2;
-            const nextSecondary = nextPrimary + 1;
-        };
-        dfs(1);
+            return new GridSplit(
+                node.id,
+                node.direction!,
+                node.ratio!,
+                primary,
+                secondary
+            );
+        }
     }
-    calculate(): void {
-        const bfs = (cur: ChildNode, parent: GridSplit) => {
-            if (cur.type === 'item') {
-                cur.applyLayout(parent);
-                return;
-            } else {
-                bfs(cur.primaryChild, cur);
-                bfs(cur.secondaryChild, cur);
-            }
-        };
 
-        if (this._root.child) {
-            // bfs(this._root.child, this._root);
+    private calculateLayout(parent: GridSplit): void {
+        // 자식들에게 부모 기반으로 레이아웃 적용
+        parent.primaryChild.applyLayout(parent);
+        parent.secondaryChild.applyLayout(parent);
+
+        // 자식이 Split이면 재귀
+        if (parent.primaryChild.type === 'split') {
+            this.calculateLayout(parent.primaryChild);
+        }
+        if (parent.secondaryChild.type === 'split') {
+            this.calculateLayout(parent.secondaryChild);
         }
     }
 }
