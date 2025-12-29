@@ -90,28 +90,62 @@ export function parseChildren(
 }
 
 /**
- * ComponentNode 트리를 DFS 순회하여 모든 노드를 배열로 변환
- * @param root - 루트 ComponentNode
- * @returns ComponentNode 배열 (인덱스 = ID)
+ * Tree에서 계산된 레이아웃 값을 React children에 주입
+ * @param reactNode - React 노드
+ * @param treeNode - 계산된 레이아웃 값을 가진 Tree 노드
+ * @param options - 컴포넌트 타입 판별을 위한 옵션
+ * @returns 레이아웃 props가 주입된 React 노드
  */
-// export function flattenComponentTree(
-//     root: ComponentNode | null
-// ): ComponentNode[] {
-//     if (!root) return [];
+export function injectLayoutToChildren(
+    reactNode: React.ReactNode,
+    treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
+    options: ParseChildrenOptions
+): React.ReactNode {
+    const { DndGridSplit, DndGridItem } = options;
 
-//     const result: ComponentNode[] = [];
+    if (!React.isValidElement(reactNode)) {
+        return reactNode;
+    }
 
-//     const dfs = (node: ComponentNode) => {
-//         // 현재 노드를 배열의 ID 위치에 저장
-//         result[node.id] = node;
+    // 공통 레이아웃 props
+    const layoutProps = {
+        width: treeNode.width,
+        height: treeNode.height,
+        top: treeNode.top,
+        left: treeNode.left,
+    };
 
-//         // Split 노드인 경우 자식들도 재귀적으로 처리
-//         if (node.type === 'split' && node.primary && node.secondary) {
-//             dfs(node.primary);
-//             dfs(node.secondary);
-//         }
-//     };
+    // DndGridItem인 경우
+    if (reactNode.type === DndGridItem) {
+        return React.cloneElement(reactNode, layoutProps as any);
+    }
 
-//     dfs(root);
-//     return result;
-// }
+    // DndGridSplit인 경우
+    if (reactNode.type === DndGridSplit && treeNode.type === 'split') {
+        const props = reactNode.props as { children: React.ReactNode };
+        const childrenArray = React.Children.toArray(props.children);
+
+        if (childrenArray.length !== 2) {
+            console.warn('DndGridSplit should have exactly 2 children');
+            return reactNode;
+        }
+
+        return React.cloneElement(reactNode, {
+            ...layoutProps,
+            children: [
+                injectLayoutToChildren(
+                    childrenArray[0],
+                    treeNode.primaryChild,
+                    options
+                ),
+                injectLayoutToChildren(
+                    childrenArray[1],
+                    treeNode.secondaryChild,
+                    options
+                ),
+            ],
+        } as any);
+    }
+
+    return reactNode;
+}
