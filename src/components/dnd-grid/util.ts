@@ -1,5 +1,4 @@
 import React from 'react';
-
 export interface ComponentNode {
     type: 'split' | 'item';
     id: number;
@@ -148,4 +147,48 @@ export function injectLayoutToChildren(
     }
 
     return reactNode;
+}
+
+export type DropQuadrant = 'top' | 'left' | 'right' | 'bottom';
+
+export type CalculateQuadrantProps = {
+    startLeft: number;
+    startTop: number;
+    width: number;
+    height: number;
+    mouseX: number;
+    mouseY: number;
+};
+export const calculateQuadrantPosition = ({
+    mouseX,
+    mouseY,
+    startLeft, //left
+    startTop, //top
+    height,
+    width,
+}: CalculateQuadrantProps): DropQuadrant => {
+    const inclineY = Math.round(
+        ((startLeft - mouseX) * height) / width + startTop + height
+    );
+
+    const declineY = Math.round(
+        ((mouseX - startLeft) * height) / width + startTop
+    );
+
+    // console.log(`inc:${inclineY}, dec:${declineY},cur:${mouseY}`);
+    if (mouseY <= inclineY && mouseY <= declineY) return 'top';
+    if (mouseY <= inclineY && mouseY >= declineY) return 'left';
+    if (mouseY >= inclineY && mouseY <= declineY) return 'right';
+    return 'bottom';
+};
+
+// Shadow 표시 헬퍼
+export function getQuadrantShadow(quadrant: DropQuadrant): string {
+    const shadows: Record<DropQuadrant, string> = {
+        top: 'inset 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
+        left: 'inset 10px 0 10px -5px rgba(0, 0, 0, 0.3)',
+        right: 'inset -10px 0 10px -5px rgba(0, 0, 0, 0.3)',
+        bottom: 'inset 0 -10px 10px -5px rgba(0, 0, 0, 0.3)',
+    };
+    return shadows[quadrant];
 }
