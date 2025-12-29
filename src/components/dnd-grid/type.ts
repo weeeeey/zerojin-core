@@ -3,10 +3,8 @@
 type CONTAINER = 'container';
 type ITEM = 'item';
 type SPLIT = 'split';
-
-type DndNodeType = ITEM | SPLIT;
-
-type DndSplitDirection = 'horizontality' | 'verticality';
+export type NodeType = ITEM | SPLIT;
+export type DndSplitDirection = 'horizontality' | 'verticality';
 
 /**
  * [tree의 규칙]
@@ -41,14 +39,19 @@ type DndSplitDirection = 'horizontality' | 'verticality';
  * -split의 자식인 
  */
 
-interface DndGridContainerType {
+export interface DndGridContainerType {
     type: CONTAINER;
+
     width: number;
     height: number;
-    className?: string;
+
+    radio: 1;
+    top: 0;
+    left: 0;
 }
 
 interface DefaultType {
+    id: number;
     width: number;
     // primary - 부모 split가 수평: width(부모), 수직: radio(부모)*width(부모),
     // secondary -          수평: width(부모), 수직: width(부모)-width(형제)
@@ -64,15 +67,15 @@ interface DefaultType {
     // secondary -         수평: left(부모),  수직:left(부모)+width(형제)
 }
 
-interface DndGridItemType extends DefaultType {
-    type: ITEM;
-}
+export type DndGridNodeType = DndGridItemType | DndGridSplitType;
 
-interface DndGridSplitType extends DefaultType {
-    type: SPLIT;
+export interface DndGridItemType extends DefaultType {}
+
+export interface DndGridSplitType extends DefaultType {
     direction: DndSplitDirection; // 분할 할려는 수직 또는 수평을 지정해줘야 한다.
 
     ratio: number; // 0과 1사이의 숫자 (비율이 와야한다)
 
-    childrenType: SPLIT | ITEM;
+    primaryChild: DndGridNodeType;
+    secondaryChild: DndGridNodeType;
 }
