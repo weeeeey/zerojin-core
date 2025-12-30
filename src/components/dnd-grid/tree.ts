@@ -7,6 +7,8 @@ export type NodeType = ITEM | SPLIT;
 export type DndSplitDirection = 'horizontal' | 'vertical';
 
 export type ChildNode = GridItem | GridSplit;
+
+type ParentWithCurrent = { node: ChildNode; parent: GridSplit | null };
 // Base Node class for common properties and methods
 abstract class BaseNode {
     private _id: number;
@@ -208,6 +210,11 @@ export class GridSplit extends BaseNode {
     set secondaryChild(value: ChildNode) {
         this._secondaryChild = value;
     }
+
+    isPrimaryChildren(targetId: number): boolean {
+        if (targetId === this.primaryChild.id) return true;
+        return false;
+    }
 }
 
 export class GridContainer {
@@ -342,11 +349,32 @@ export class Tree {
         return this.getMaxId(this._root) + 1;
     }
 
+    private generateNewSplitNode(
+        dragged: ChildNode,
+        hovered: ChildNode,
+        dropQuadrant: DropQuadrant
+    ) {
+        const directon = getSplitDirection(dropQuadrant);
+        let primary = dragged;
+        let secondary = hovered;
+        if (dropQuadrant === 'bottom' || dropQuadrant === 'right') {
+            [primary, secondary] = [secondary, primary];
+        }
+
+        return new GridSplit(
+            this.generateNewId(),
+            directon,
+            0.5,
+            primary,
+            secondary
+        );
+    }
+
     private findNodeWithParent(
         targetId: number,
         current: ChildNode = this._root,
         parent: GridSplit | null = null
-    ): { node: ChildNode; parent: GridSplit | null } | null {
+    ): ParentWithCurrent | null {
         if (current.id === targetId) {
             return { node: current, parent };
         }
@@ -371,6 +399,15 @@ export class Tree {
     }
 
     /**
+     * 같은 부모를 공유하는 두 노드의 위치를 교환합니다.
+     */
+    private swapSiblings(parent: GridSplit): void {
+        const temp = parent.primaryChild;
+        parent.primaryChild = parent.secondaryChild;
+        parent.secondaryChild = temp;
+    }
+
+    /**
      *
      * @param draggedItemId
      * @param hoveredItemId
@@ -389,30 +426,62 @@ export class Tree {
      * 4. ds의 자식 중 di가 아닌 item을 dds의 primary 또는 secondary 중 ds 에 해당하는 자리에 넣어준다.
      * 5. 변경 된 트리의 루트부터 요소들의 레이아웃을 재계산해준다.
      */
+
     restructureByDrop(
         draggedItemId: number,
         hoveredItemId: number,
         dropQuadrant: DropQuadrant
     ) {
-        const hovered = this.findNodeWithParent(hoveredItemId);
         const dragged = this.findNodeWithParent(draggedItemId);
-        if (!hovered || !dragged) throw Error('aaa');
-
-        const directon = getSplitDirection(dropQuadrant);
-        let primary = dragged.node;
-        let secondary = hovered.node;
-        if (dropQuadrant === 'bottom' || dropQuadrant === 'right') {
-            [primary, secondary] = [secondary, primary];
+        const hovered = this.findNodeWithParent(hoveredItemId);
+        if (!dragged || !hovered || !dragged.parent || !hovered.parent) {
+            throw Error('Invalid drag/drop state');
         }
 
-        const newSplitNode = new GridSplit(
-            this.generateNewId(),
-            directon,
-            0.5,
-            primary,
-            secondary
+        // 같은 부모를 공유하는 경우: 위치만 교환
+        if (dragged.parent === hovered.parent) {
+            this.swapSiblings(dragged.parent);
+
+            if (this._root.type === 'split') {
+                this.calculateLayout(this._root);
+            }
+            return;
+        }
+
+        // 2단계: 새 Split 생성
+        const newSplitNode = this.generateNewSplitNode(
+            dragged.node,
+            hovered.node,
+            dropQuadrant
         );
-        console.log(newSplitNode);
+
+        // 3단계: hovered 부모에 새 Split 연결
+        if (hovered.parent.isPrimaryChildren(hovered.node.id)) {
+            hovered.parent.primaryChild = newSplitNode;
+        } else {
+            hovered.parent.secondaryChild = newSplitNode;
+        }
+
+        // 4단계: dragged 형제 승격
+        const { parent: draggedGrandParent } = this.findNodeWithParent(
+            dragged.parent.id
+        )!;
+        const siblingDragNode = dragged.parent.isPrimaryChildren(
+            dragged.node.id
+        )
+            ? dragged.parent.secondaryChild
+            : dragged.parent.primaryChild;
+
+        if (draggedGrandParent?.isPrimaryChildren(dragged.parent.id)) {
+            draggedGrandParent.primaryChild = siblingDragNode;
+        } else {
+            draggedGrandParent!.secondaryChild = siblingDragNode;
+        }
+
+        // 5단계: 레이아웃 재계산
+        if (this._root.type === 'split') {
+            this.calculateLayout(this._root);
+        }
     }
 }
 

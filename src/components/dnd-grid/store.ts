@@ -94,6 +94,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
             draggedItemId !== hoveredItemId
         ) {
             tree.restructureByDrop(draggedItemId, hoveredItemId, dropQuadrant);
+            console.log(tree);
         }
 
         // 드래그 상태 초기화
@@ -142,6 +143,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
 
     // DnD: draggedItem을 targetItem의 특정 사분면에 삽입
     // endDrop에서 한번에 처리하도록 일단 수정 중임
+
     // insertItemAt: (draggedItemId, targetItemId, quadrant) => {
     //     const { tree } = get();
 
