@@ -106,7 +106,7 @@ interface DndGridItemProps {
 1. mousedown → startDrag(id)
 2. mousemove (throttled) → setDropQuadrant(quadrant)
 3. mouseenter/leave → setHoveredItem(id | null)
-4. mouseup → endDrag() → insertItemAt 자동 호출
+4. mouseup → store.handleDrop 호출
  */
 
 function DndGridItem({ id }: DndGridItemProps) {
@@ -182,14 +182,6 @@ function DndGridItem({ id }: DndGridItemProps) {
         };
 
         const handleMouseUp = () => {
-            // 드래그 종료 시 상태 출력
-            const state = useTreeStore.getState();
-            console.log('=== 드래그 종료 ===');
-            console.log('드래그된 아이템 ID:', state.draggedItemId);
-            console.log('타겟 아이템 ID:', state.hoveredItemId);
-            console.log('드롭 사분면:', state.dropQuadrant);
-            console.log('================');
-
             endDrag();
 
             document.removeEventListener('mousemove', handleMouseMove);

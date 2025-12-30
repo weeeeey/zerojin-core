@@ -1,4 +1,5 @@
 import React from 'react';
+import { DndSplitDirection } from './tree';
 export interface ComponentNode {
     type: 'split' | 'item';
     id: number;
@@ -190,4 +191,17 @@ export function getQuadrantShadow(quadrant: DropQuadrant | null): string {
     };
 
     return shadows[quadrant];
+}
+
+export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
+    switch (quadrant) {
+        case 'top':
+            return 'horizontal';
+        case 'bottom':
+            return 'horizontal';
+        case 'left':
+            return 'vertical';
+        default:
+            return 'vertical';
+    }
 }

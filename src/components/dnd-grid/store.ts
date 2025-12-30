@@ -29,11 +29,11 @@ interface TreeStore extends DragDropStore {
     ) => Tree;
 
     // DnD 메서드
-    insertItemAt: (
-        draggedItemId: number,
-        targetItemId: number,
-        quadrant: DropQuadrant
-    ) => void;
+    // insertItemAt: (
+    //     draggedItemId: number,
+    //     targetItemId: number,
+    //     quadrant: DropQuadrant
+    // ) => void;
 
     // 노드 조회 헬퍼
     getNode: (id: number) => ChildNode | undefined;
@@ -83,16 +83,18 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
 
     // 드래그 종료 (드롭 처리)
     endDrag: () => {
-        const { draggedItemId, hoveredItemId, dropQuadrant } = get();
+        const { draggedItemId, hoveredItemId, dropQuadrant, tree } = get();
 
         // 유효한 드롭인 경우만 insertItemAt 호출
         if (
+            tree !== null &&
             draggedItemId !== null &&
             hoveredItemId !== null &&
             dropQuadrant !== null &&
             draggedItemId !== hoveredItemId
         ) {
-            get().insertItemAt(draggedItemId, hoveredItemId, dropQuadrant);
+            tree.restructureByDrop(draggedItemId, hoveredItemId, dropQuadrant);
+            console.log(tree);
         }
 
         // 드래그 상태 초기화
@@ -140,28 +142,30 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     },
 
     // DnD: draggedItem을 targetItem의 특정 사분면에 삽입
-    insertItemAt: (draggedItemId, targetItemId, quadrant) => {
-        const { tree } = get();
+    // endDrop에서 한번에 처리하도록 일단 수정 중임
 
-        if (!tree) {
-            console.warn('Tree not initialized');
-            return;
-        }
+    // insertItemAt: (draggedItemId, targetItemId, quadrant) => {
+    //     const { tree } = get();
 
-        // TODO: Tree.insertItemAt 메서드 구현 후 호출
-        // tree.insertItemAt(draggedItemId, targetItemId, quadrant);
+    //     if (!tree) {
+    //         console.warn('Tree not initialized');
+    //         return;
+    //     }
 
-        // 트리 재구성 후 nodes 업데이트
-        const nodes = flattenTreeToMap(tree.root);
-        set({ nodes });
+    //     // TODO: Tree.insertItemAt 메서드 구현 후 호출
+    //     // tree.insertItemAt(draggedItemId, targetItemId, quadrant);
 
-        console.log('Item inserted:', {
-            draggedItemId,
-            targetItemId,
-            quadrant,
-            nodeCount: nodes.size,
-        });
-    },
+    //     // 트리 재구성 후 nodes 업데이트
+    //     const nodes = flattenTreeToMap(tree.root);
+    //     set({ nodes });
+
+    //     console.log('Item inserted:', {
+    //         draggedItemId,
+    //         targetItemId,
+    //         quadrant,
+    //         nodeCount: nodes.size,
+    //     });
+    // },
 
     // 노드 조회
     getNode: (id) => {
