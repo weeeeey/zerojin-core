@@ -10,15 +10,13 @@ interface TreeStore {
     // 상태
     tree: Tree | null;
     nodes: Map<number, ChildNode>;
-    containerWidth: number;
-    containerHeight: number;
 
     // Tree 초기화
     buildTree: (
         componentTree: ComponentNode,
         width: number,
         height: number
-    ) => void;
+    ) => Tree;
 
     // DnD 메서드
     insertItemAt: (
@@ -58,8 +56,6 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     // 초기 상태
     tree: null,
     nodes: new Map(),
-    containerWidth: 0,
-    containerHeight: 0,
 
     // Tree 초기화
     buildTree: (componentTree, width, height) => {
@@ -69,9 +65,9 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
         set({
             tree,
             nodes,
-            containerWidth: width,
-            containerHeight: height,
         });
+
+        return tree;
     },
 
     // DnD: draggedItem을 targetItem의 특정 사분면에 삽입
