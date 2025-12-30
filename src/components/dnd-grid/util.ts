@@ -180,12 +180,14 @@ export const getQuadrantPosition = ({
 };
 
 // Shadow 표시 헬퍼
-export function getQuadrantShadow(quadrant: DropQuadrant): string {
+export function getQuadrantShadow(quadrant: DropQuadrant | null): string {
+    if (quadrant === null) return '';
     const shadows: Record<DropQuadrant, string> = {
         top: 'inset 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
         left: 'inset 10px 0 10px -5px rgba(0, 0, 0, 0.3)',
         right: 'inset -10px 0 10px -5px rgba(0, 0, 0, 0.3)',
         bottom: 'inset 0 -10px 10px -5px rgba(0, 0, 0, 0.3)',
     };
+
     return shadows[quadrant];
 }

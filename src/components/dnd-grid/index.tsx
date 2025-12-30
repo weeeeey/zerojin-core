@@ -11,6 +11,7 @@ import {
     parseChildren,
     injectLayoutToChildren,
     getQuadrantPosition,
+    getQuadrantShadow,
 } from './util';
 
 import { useTreeStore } from './store';
@@ -114,6 +115,8 @@ function DndGridItem({ id }: DndGridItemProps) {
     );
     const draggedItemId = useTreeStore((state) => state.draggedItemId);
     const hoveredItemId = useTreeStore((state) => state.hoveredItemId);
+    const dropQuadrant = useTreeStore((state) => state.dropQuadrant);
+
     const startDrag = useTreeStore((state) => state.startDrag);
     const endDrag = useTreeStore((state) => state.endDrag);
     const setHoveredItem = useTreeStore((state) => state.setHoveredItem);
@@ -153,7 +156,8 @@ function DndGridItem({ id }: DndGridItemProps) {
             }
 
             // Container의 뷰포트 기준 위치 가져오기
-            const containerRect = state.containerRef?.current?.getBoundingClientRect();
+            const containerRect =
+                state.containerRef?.current?.getBoundingClientRect();
             if (!containerRect) {
                 setDropQuadrant(null);
                 return;
@@ -220,13 +224,10 @@ function DndGridItem({ id }: DndGridItemProps) {
                 left: `${node.left}px`,
                 border: '1px solid black',
                 boxSizing: 'border-box',
-                backgroundColor: isDragging
-                    ? '#d0d0d0'
-                    : isHovered
-                    ? '#e0e0e0'
-                    : '#f0f0f0',
+                backgroundColor: isDragging ? '#d0d0d0' : '',
                 cursor: isDragging ? 'grabbing' : 'grab',
                 opacity: isDragging ? 0.5 : 1,
+                boxShadow: isHovered ? getQuadrantShadow(dropQuadrant) : '',
             }}
         >
             Item {id} ({node.width}x{node.height})
