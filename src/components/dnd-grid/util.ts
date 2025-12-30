@@ -69,7 +69,7 @@ export function parseChildren(
             type: 'split',
             id: nodeId,
             direction: props.direction,
-            ratio: props.ratio,
+            ratio: +props.ratio.toFixed(2),
             primary,
             secondary,
         };
@@ -156,7 +156,7 @@ export type CalculateQuadrantProps = {
     mouseX: number;
     mouseY: number;
 };
-export const calculateQuadrantPosition = ({
+export const getQuadrantPosition = ({
     mouseX,
     mouseY,
     startLeft, //left

@@ -6,7 +6,7 @@ type SPLIT = 'split';
 export type NodeType = ITEM | SPLIT;
 export type DndSplitDirection = 'horizontal' | 'vertical';
 
-type ChildNode = GridItem | GridSplit;
+export type ChildNode = GridItem | GridSplit;
 // Base Node class for common properties and methods
 abstract class BaseNode {
     private _id: number;
@@ -151,16 +151,6 @@ abstract class BaseNode {
 // 렌더링 될 컴포넌트(그리드 아이템)
 export class GridItem extends BaseNode {
     readonly type = 'item' as const;
-
-    // constructor(
-    //     id: number,
-    //     width: number,
-    //     height: number,
-    //     top: number,
-    //     left: number
-    // ) {
-    //     super(id);
-    // }
 }
 
 // 컴포넌트를 분할 할 보이지 않는 선
