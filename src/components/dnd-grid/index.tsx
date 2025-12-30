@@ -113,9 +113,13 @@ function DndGridItem({ id }: DndGridItemProps) {
     const node = useTreeStore((state) =>
         id ? state.nodes.get(id) : undefined
     );
-    const draggedItemId = useTreeStore((state) => state.draggedItemId);
-    const hoveredItemId = useTreeStore((state) => state.hoveredItemId);
-    const dropQuadrant = useTreeStore((state) => state.dropQuadrant);
+    const isDragging = useTreeStore((state) => state.draggedItemId === id);
+    const isHovered = useTreeStore(
+        (state) => state.hoveredItemId === id && state.draggedItemId !== id
+    );
+    const dropQuadrant = useTreeStore((state) =>
+        state.hoveredItemId === id ? state.dropQuadrant : null
+    );
 
     const startDrag = useTreeStore((state) => state.startDrag);
     const endDrag = useTreeStore((state) => state.endDrag);
@@ -125,9 +129,6 @@ function DndGridItem({ id }: DndGridItemProps) {
     if (!node) {
         throw new Error('grid item 생성 실패');
     }
-
-    const isDragging = draggedItemId === id;
-    const isHovered = hoveredItemId === id && !isDragging;
 
     const handleMouseDown = () => {
         if (!id) return;
@@ -200,12 +201,17 @@ function DndGridItem({ id }: DndGridItemProps) {
     };
 
     const handleMouseEnter = () => {
+        const state = useTreeStore.getState(); // 이벤트 시점의 최신값 가져오기
+        const { draggedItemId } = state;
+
         if (id && draggedItemId !== null && draggedItemId !== id) {
             setHoveredItem(id);
         }
     };
 
     const handleMouseLeave = () => {
+        const state = useTreeStore.getState(); // 이벤트 시점의 최신값 가져오기
+        const { draggedItemId } = state;
         if (draggedItemId !== null) {
             setHoveredItem(null);
         }
