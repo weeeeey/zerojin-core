@@ -89,11 +89,11 @@ export function parseChildren(
 }
 
 /**
- * Tree에서 계산된 레이아웃 값을 React children에 주입
+ * Tree에서 계산된 ID를 React children에 주입
  * @param reactNode - React 노드
- * @param treeNode - 계산된 레이아웃 값을 가진 Tree 노드
+ * @param treeNode - 계산된 ID를 가진 Tree 노드
  * @param options - 컴포넌트 타입 판별을 위한 옵션
- * @returns 레이아웃 props가 주입된 React 노드
+ * @returns ID props가 주입된 React 노드
  */
 export function injectLayoutToChildren(
     reactNode: React.ReactNode,
@@ -106,17 +106,14 @@ export function injectLayoutToChildren(
         return reactNode;
     }
 
-    // 공통 레이아웃 props
-    const layoutProps = {
-        width: treeNode.width,
-        height: treeNode.height,
-        top: treeNode.top,
-        left: treeNode.left,
+    // ID만 주입
+    const idProps = {
+        id: treeNode.id,
     };
 
     // DndGridItem인 경우
     if (reactNode.type === DndGridItem) {
-        return React.cloneElement(reactNode, layoutProps as any);
+        return React.cloneElement(reactNode, idProps as any);
     }
 
     // DndGridSplit인 경우
@@ -130,7 +127,7 @@ export function injectLayoutToChildren(
         }
 
         return React.cloneElement(reactNode, {
-            ...layoutProps,
+            ...idProps,
             children: [
                 injectLayoutToChildren(
                     childrenArray[0],

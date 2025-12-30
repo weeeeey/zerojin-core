@@ -72,11 +72,6 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
             containerWidth: width,
             containerHeight: height,
         });
-
-        console.log('Tree built:', {
-            nodeCount: nodes.size,
-            root: tree.root,
-        });
     },
 
     // DnD: draggedItem을 targetItem의 특정 사분면에 삽입

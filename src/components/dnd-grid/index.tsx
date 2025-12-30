@@ -1,8 +1,9 @@
 'use client';
 
-import React, { Children, useLayoutEffect, useState } from 'react';
+import React, { Children, useEffect, useLayoutEffect, useState } from 'react';
 import { parseChildren, injectLayoutToChildren } from './util';
 import Tree from './tree';
+import { useTreeStore } from './store';
 
 export default function DndGrid() {
     return (
@@ -12,7 +13,6 @@ export default function DndGrid() {
                     <DndGridItem />
                     <DndGridItem />
                 </DndGridSplit>
-
                 <DndGridItem />
             </DndGridSplit>
         </DndGridContainer>
@@ -29,6 +29,8 @@ function DndGridContainer({
     height: number;
 }) {
     const [enhancedChildren, setEnhancedChildren] = useState<React.ReactNode>();
+    const buildTree = useTreeStore((state) => state.buildTree);
+    const tree = useTreeStore((v) => v.tree);
 
     useLayoutEffect(() => {
         const firstChild = Children.toArray(children)[0];
@@ -44,17 +46,42 @@ function DndGridContainer({
             return;
         }
 
-        // 2. Tree 생성 및 레이아웃 계산
-        const tree = new Tree(width, height, componentTree);
+        // 2. Tree 생성 및 레이아웃 계산 (store에 저장)
+        buildTree(componentTree, width, height);
 
-        // 3. 계산된 레이아웃을 children에 주입
-        const injectedChildren = injectLayoutToChildren(firstChild, tree.root, {
-            DndGridSplit,
-            DndGridItem,
-        });
+        // console.log(tree);
+        // 3. 계산된 ID를 children에 주입
+
+        // if (!tree?.root) return;
+
+        // const injectedChildren = injectLayoutToChildren(
+        //     firstChild,
+        //     tree?.root,
+        //     {
+        //         DndGridSplit,
+        //         DndGridItem,
+        //     }
+        // );
+
+        // setEnhancedChildren(injectedChildren);
+    }, [buildTree]);
+
+    useLayoutEffect(() => {
+        const firstChild = Children.toArray(children)[0];
+        console.log(tree);
+        if (!tree || !tree.root) return;
+
+        const injectedChildren = injectLayoutToChildren(
+            firstChild,
+            tree?.root,
+            {
+                DndGridSplit,
+                DndGridItem,
+            }
+        );
 
         setEnhancedChildren(injectedChildren);
-    }, [children, width, height]);
+    }, [tree]);
 
     return (
         <div
@@ -70,27 +97,33 @@ function DndGridContainer({
 }
 
 interface DndGridItemProps {
-    width?: number;
-    height?: number;
-    top?: number;
-    left?: number;
+    id?: number;
 }
 
-function DndGridItem({ width, height, top, left }: DndGridItemProps) {
+function DndGridItem({ id }: DndGridItemProps) {
+    const node = useTreeStore((state) =>
+        id ? state.nodes.get(id) : undefined
+    );
+    console.log(id, node);
+
+    if (!node) {
+        return null;
+    }
+
     return (
         <div
             style={{
                 position: 'absolute',
-                width: width ? `${width}px` : undefined,
-                height: height ? `${height}px` : undefined,
-                top: top ? `${top}px` : undefined,
-                left: left ? `${left}px` : undefined,
+                width: `${node.width}px`,
+                height: `${node.height}px`,
+                top: `${node.top}px`,
+                left: `${node.left}px`,
                 border: '1px solid black',
                 boxSizing: 'border-box',
                 backgroundColor: '#f0f0f0',
             }}
         >
-            Item ({width}x{height})
+            Item {id} ({node.width}x{node.height})
         </div>
     );
 }
@@ -99,21 +132,16 @@ interface DndGridSplitProps {
     children: [React.ReactNode, React.ReactNode];
     direction: 'horizontal' | 'vertical';
     ratio: number;
-    width?: number;
-    height?: number;
-    top?: number;
-    left?: number;
+    id?: number;
 }
 
-function DndGridSplit({
-    children,
-    direction,
-    ratio,
-    width,
-    height,
-    top,
-    left,
-}: DndGridSplitProps) {
+function DndGridSplit({ children, ratio, id }: DndGridSplitProps) {
+    const node = useTreeStore((state) =>
+        id ? state.nodes.get(id) : undefined
+    );
+
+    if (!node) return null;
+
     if (ratio < 0 || ratio > 1) {
         throw new Error(`ratio must be between 0 and 1, got ${ratio}`);
     }
@@ -124,10 +152,10 @@ function DndGridSplit({
         <div
             style={{
                 position: 'absolute',
-                width: width ? `${width}px` : undefined,
-                height: height ? `${height}px` : undefined,
-                top: top ? `${top}px` : undefined,
-                left: left ? `${left}px` : undefined,
+                width: `${node.width}px`,
+                height: `${node.height}px`,
+                top: `${node.top}px`,
+                left: `${node.left}px`,
             }}
         >
             {primary}
