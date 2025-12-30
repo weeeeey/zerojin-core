@@ -106,7 +106,7 @@ interface DndGridItemProps {
 1. mousedown → startDrag(id)
 2. mousemove (throttled) → setDropQuadrant(quadrant)
 3. mouseenter/leave → setHoveredItem(id | null)
-4. mouseup → endDrag() → insertItemAt 자동 호출
+4. mouseup → store.handleDrop 호출
  */
 
 function DndGridItem({ id }: DndGridItemProps) {

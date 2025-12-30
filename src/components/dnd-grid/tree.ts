@@ -1,4 +1,4 @@
-import { ComponentNode } from './util';
+import { ComponentNode, DropQuadrant, getSplitDirection } from './util';
 
 type ITEM = 'item';
 type SPLIT = 'split';
@@ -192,10 +192,6 @@ export class GridSplit extends BaseNode {
         return this._secondaryChild;
     }
 
-    get primary(): ChildNode {
-        return this._primaryChild;
-    }
-
     // Setters
     set direction(value: DndSplitDirection) {
         this._direction = value;
@@ -331,6 +327,92 @@ export class Tree {
         if (parent.secondaryChild.type === 'split') {
             this.calculateLayout(parent.secondaryChild);
         }
+    }
+
+    private getMaxId(node: ChildNode): number {
+        if (node.type === 'item') {
+            return node.id;
+        }
+        const primaryMax = this.getMaxId(node.primaryChild);
+        const secondaryMax = this.getMaxId(node.secondaryChild);
+        return Math.max(node.id, primaryMax, secondaryMax);
+    }
+
+    private generateNewId(): number {
+        return this.getMaxId(this._root) + 1;
+    }
+
+    private findNodeWithParent(
+        targetId: number,
+        current: ChildNode = this._root,
+        parent: GridSplit | null = null
+    ): { node: ChildNode; parent: GridSplit | null } | null {
+        if (current.id === targetId) {
+            return { node: current, parent };
+        }
+
+        if (current.type === 'split') {
+            const foundInPrimary = this.findNodeWithParent(
+                targetId,
+                current.primaryChild,
+                current
+            );
+            if (foundInPrimary) return foundInPrimary;
+
+            const foundInSecondary = this.findNodeWithParent(
+                targetId,
+                current.secondaryChild,
+                current
+            );
+            if (foundInSecondary) return foundInSecondary;
+        }
+
+        return null;
+    }
+
+    /**
+     *
+     * @param draggedItemId
+     * @param hoveredItemId
+     * @param dropQuadrant
+     *
+     * hoverItemId(hi)의 Parent Split -> hS
+     * draggedItemId(di)의 parent Split -> ds , * ds의 parent Split -> dds ,
+     *
+     * 1. hi가 hs의 primary인지 secondary인지 구하기
+     * 2. 새로운 split 노드를 생성한다. (ns)
+     *  2-0 id는 어떻게 할지 고민 중
+     *  2-1. ratio 0.5
+     *  2-2. dropQuadrant가 top|bottom horizon, left|right vertical 생성
+     *  2-3. left 또는 top이라면 ns의 primary는 di secondary는 hi, right 또는 bottom이라면 반대
+     * 3. 1번에서 구한 primary 또는 secondary에 ns를 등록해준다.
+     * 4. ds의 자식 중 di가 아닌 item을 dds의 primary 또는 secondary 중 ds 에 해당하는 자리에 넣어준다.
+     * 5. 변경 된 트리의 루트부터 요소들의 레이아웃을 재계산해준다.
+     */
+    restructureByDrop(
+        draggedItemId: number,
+        hoveredItemId: number,
+        dropQuadrant: DropQuadrant
+    ) {
+        const hovered = this.findNodeWithParent(hoveredItemId);
+        const dragged = this.findNodeWithParent(draggedItemId);
+        if (!hovered || !dragged) throw Error('aaa');
+
+        const directon = getSplitDirection(dropQuadrant);
+        let primary = dragged.node;
+        let secondary = hovered.node;
+        if (dropQuadrant === 'bottom' || dropQuadrant === 'right') {
+            [primary, secondary] = [secondary, primary];
+        }
+
+        const newSplitNode = new GridSplit(
+            this.generateNewId(),
+            directon,
+            0.5,
+            primary,
+            secondary
+        );
+        console.log(newSplitNode);
     }
 }
 
