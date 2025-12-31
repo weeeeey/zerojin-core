@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import Tree, { ChildNode } from './tree';
-import { ComponentNode } from './util';
+import Tree, { ChildNode, cloneNode } from './tree';
+import type { ComponentNode } from './util';
 import type { DropQuadrant } from './util';
 import React from 'react';
 
@@ -17,25 +17,16 @@ interface DragDropStore {
 }
 
 interface TreeStore extends DragDropStore {
-    // 상태
     tree: Tree | null;
     nodes: Map<number, ChildNode>;
+    willRerenderNodeIds: Set<Number>;
 
-    // Tree 초기화
     buildTree: (
         componentTree: ComponentNode,
         width: number,
         height: number
     ) => Tree;
 
-    // DnD 메서드
-    // insertItemAt: (
-    //     draggedItemId: number,
-    //     targetItemId: number,
-    //     quadrant: DropQuadrant
-    // ) => void;
-
-    // 노드 조회 헬퍼
     getNode: (id: number) => ChildNode | undefined;
 }
 
@@ -62,10 +53,55 @@ function flattenTreeToMap(root: ChildNode): Map<number, ChildNode> {
     return map;
 }
 
+/**
+ * 변경된 노드들만 복제하여 새로운 Map을 생성합니다.
+ * affectedIds에 포함된 노드는 새 객체로 복제하고,
+ * 그렇지 않은 노드는 기존 참조를 유지합니다.
+ */
+function cloneAffectedNodes(
+    tree: Tree,
+    affectedIds: Set<number>
+): Map<number, ChildNode> {
+    const newNodes = new Map<number, ChildNode>();
+
+    const traverse = (node: ChildNode): ChildNode => {
+        // 이 노드가 영향받았다면 복제
+        const processedNode = affectedIds.has(node.id) ? cloneNode(node) : node;
+
+        // Split 노드라면 자식들도 순회
+        if (node.type === 'split') {
+            const clonedPrimary = traverse(node.primaryChild);
+            const clonedSecondary = traverse(node.secondaryChild);
+
+            // 자식이 변경되었다면 이 Split도 복제해야 함
+            if (
+                clonedPrimary !== node.primaryChild ||
+                clonedSecondary !== node.secondaryChild
+            ) {
+                const splitClone =
+                    processedNode === node ? cloneNode(node) : processedNode;
+                if (splitClone.type === 'split') {
+                    splitClone.primaryChild = clonedPrimary;
+                    splitClone.secondaryChild = clonedSecondary;
+                }
+                newNodes.set(splitClone.id, splitClone);
+                return splitClone;
+            }
+        }
+
+        newNodes.set(processedNode.id, processedNode);
+        return processedNode;
+    };
+
+    traverse(tree.root);
+    return newNodes;
+}
+
 export const useTreeStore = create<TreeStore>((set, get) => ({
     // 초기 상태
     tree: null,
     nodes: new Map(),
+    willRerenderNodeIds: new Set(),
 
     draggedItemId: null,
     hoveredItemId: null,
@@ -85,7 +121,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     endDrag: () => {
         const { draggedItemId, hoveredItemId, dropQuadrant, tree } = get();
 
-        // 유효한 드롭인 경우만 insertItemAt 호출
+        // 유효한 드롭인 경우만 처리
         if (
             tree !== null &&
             draggedItemId !== null &&
@@ -93,8 +129,25 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
             dropQuadrant !== null &&
             draggedItemId !== hoveredItemId
         ) {
+            // 1. 변경 전 트리 스냅샷 생성 (current tree)
+            const snapshot = tree.createSnapshot();
+
+            // 2. 트리 재구조화 (workInProgress tree로 변경)
             tree.restructureByDrop(draggedItemId, hoveredItemId, dropQuadrant);
-            console.log(tree);
+
+            // 3. React reconciliation처럼 diff 수행
+            const changedIds = tree.diffWithSnapshot(snapshot);
+
+            // 4. 변경된 노드만 복제하여 새로운 Map 생성
+            const newNodes = cloneAffectedNodes(tree, changedIds);
+            console.log(newNodes);
+            // 5. Zustand 상태 업데이트
+            set({ nodes: newNodes });
+
+            console.log(
+                `Changed nodes (via diff): ${changedIds.size}`,
+                Array.from(changedIds)
+            );
         }
 
         // 드래그 상태 초기화

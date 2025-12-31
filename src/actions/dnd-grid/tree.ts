@@ -9,6 +9,35 @@ export type DndSplitDirection = 'horizontal' | 'vertical';
 export type ChildNode = GridItem | GridSplit;
 
 type ParentWithCurrent = { node: ChildNode; parent: GridSplit | null };
+
+/**
+ * 노드를 복제하여 새로운 객체 참조를 생성합니다.
+ * Zustand가 변경을 감지할 수 있도록 새 객체를 반환합니다.
+ */
+export function cloneNode(node: ChildNode): ChildNode {
+    if (node.type === 'item') {
+        const cloned = new GridItem(node.id);
+        cloned.width = node.width;
+        cloned.height = node.height;
+        cloned.top = node.top;
+        cloned.left = node.left;
+        return cloned;
+    } else {
+        // Split 노드는 자식 참조를 유지 (나중에 선택적으로 교체됨)
+        const cloned = new GridSplit(
+            node.id,
+            node.direction,
+            node.ratio,
+            node.primaryChild,
+            node.secondaryChild
+        );
+        cloned.width = node.width;
+        cloned.height = node.height;
+        cloned.top = node.top;
+        cloned.left = node.left;
+        return cloned;
+    }
+}
 // Base Node class for common properties and methods
 abstract class BaseNode {
     private _id: number;
@@ -426,6 +455,102 @@ export class Tree {
      * 4. ds의 자식 중 di가 아닌 item을 dds의 primary 또는 secondary 중 ds 에 해당하는 자리에 넣어준다.
      * 5. 변경 된 트리의 루트부터 요소들의 레이아웃을 재계산해준다.
      */
+
+    /**
+     * 트리의 현재 상태를 스냅샷으로 저장합니다.
+     * 나중에 diffTree로 비교할 수 있도록 shallow copy를 만듭니다.
+     */
+    createSnapshot(): Map<number, { id: number; width: number; height: number; top: number; left: number; primaryChildId?: number; secondaryChildId?: number }> {
+        const snapshot = new Map();
+
+        const traverse = (node: ChildNode) => {
+            const data: any = {
+                id: node.id,
+                width: node.width,
+                height: node.height,
+                top: node.top,
+                left: node.left,
+            };
+
+            if (node.type === 'split') {
+                data.primaryChildId = node.primaryChild.id;
+                data.secondaryChildId = node.secondaryChild.id;
+            }
+
+            snapshot.set(node.id, data);
+
+            if (node.type === 'split') {
+                traverse(node.primaryChild);
+                traverse(node.secondaryChild);
+            }
+        };
+
+        traverse(this._root);
+        return snapshot;
+    }
+
+    /**
+     * 스냅샷과 현재 트리를 비교하여 변경된 노드만 찾습니다.
+     * React reconciliation 알고리즘처럼 동작합니다.
+     */
+    diffWithSnapshot(
+        snapshot: Map<number, any>
+    ): Set<number> {
+        const changedIds = new Set<number>();
+
+        const traverse = (node: ChildNode) => {
+            const oldData = snapshot.get(node.id);
+
+            // 새로 추가된 노드
+            if (!oldData) {
+                this.collectAllDescendants(node, changedIds);
+                return;
+            }
+
+            // 레이아웃 속성 변경 체크
+            const layoutChanged =
+                oldData.width !== node.width ||
+                oldData.height !== node.height ||
+                oldData.top !== node.top ||
+                oldData.left !== node.left;
+
+            if (layoutChanged) {
+                changedIds.add(node.id);
+            }
+
+            // Split 노드의 구조 변경 체크
+            if (node.type === 'split') {
+                const structureChanged =
+                    oldData.primaryChildId !== node.primaryChild.id ||
+                    oldData.secondaryChildId !== node.secondaryChild.id;
+
+                if (structureChanged) {
+                    // 구조가 변경되면 이 노드와 모든 자손 영향받음
+                    changedIds.add(node.id);
+                    this.collectAllDescendants(node.primaryChild, changedIds);
+                    this.collectAllDescendants(node.secondaryChild, changedIds);
+                } else {
+                    // 구조가 같으면 자식들 재귀 탐색
+                    traverse(node.primaryChild);
+                    traverse(node.secondaryChild);
+                }
+            }
+        };
+
+        traverse(this._root);
+        return changedIds;
+    }
+
+    /**
+     * 주어진 노드의 모든 자손 ID를 Set에 추가합니다.
+     */
+    private collectAllDescendants(node: ChildNode, ids: Set<number>): void {
+        ids.add(node.id);
+        if (node.type === 'split') {
+            this.collectAllDescendants(node.primaryChild, ids);
+            this.collectAllDescendants(node.secondaryChild, ids);
+        }
+    }
 
     restructureByDrop(
         draggedItemId: number,
