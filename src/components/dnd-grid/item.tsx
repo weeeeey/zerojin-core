@@ -7,10 +7,10 @@ import { useTreeStore } from '../../actions/dnd-grid/store';
 
 interface DndGridItemProps {
     id?: number;
-    width?: number;
-    height?: number;
     top?: number;
     left?: number;
+    width?: number;
+    height?: number;
 }
 
 // TODO: children 추가하기
@@ -42,9 +42,9 @@ export function DndGridItem({
     const setHoveredItem = useTreeStore((state) => state.setHoveredItem);
     const setDropQuadrant = useTreeStore((state) => state.setDropQuadrant);
 
-    if (!height || !left || !top || !width) {
-        throw new Error('grid item 생성 실패');
-    }
+    // if (!height || !left || !top || !width) {
+    //     throw new Error('grid item 생성 실패');
+    // }
 
     const handleMouseDown = () => {
         if (!id) return;

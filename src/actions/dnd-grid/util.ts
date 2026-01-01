@@ -107,15 +107,22 @@ export function injectLayoutToChildren(
         return reactNode;
     }
 
-    // ID만 주입
+    // DndGridItem인 경우 - id, top, left, width, height 주입
+    if (reactNode.type === DndGridItem) {
+        const itemProps = {
+            id: treeNode.id,
+            top: treeNode.top,
+            left: treeNode.left,
+            width: treeNode.width,
+            height: treeNode.height,
+        };
+        return React.cloneElement(reactNode, itemProps as any);
+    }
+
+    // DndGridSplit인 경우 - id만 주입
     const idProps = {
         id: treeNode.id,
     };
-
-    // DndGridItem인 경우
-    if (reactNode.type === DndGridItem) {
-        return React.cloneElement(reactNode, idProps as any);
-    }
 
     // DndGridSplit인 경우
     if (reactNode.type === DndGridSplit && treeNode.type === 'split') {

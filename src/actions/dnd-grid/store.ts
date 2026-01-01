@@ -19,7 +19,7 @@ interface DragDropStore {
 interface TreeStore extends DragDropStore {
     tree: Tree | null;
     nodes: Map<number, ChildNode>;
-    willRerenderNodeIds: Set<Number>;
+    willRerenderNodes: Set<ChildNode>;
 
     buildTree: (
         componentTree: ComponentNode,
@@ -28,6 +28,9 @@ interface TreeStore extends DragDropStore {
     ) => Tree;
 
     getNode: (id: number) => ChildNode | undefined;
+
+    setWillRerenderNodes: (nodes: ChildNode[]) => void;
+    resetWillRerenderNodes: () => void;
 }
 
 /**
@@ -101,7 +104,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     // 초기 상태
     tree: null,
     nodes: new Map(),
-    willRerenderNodeIds: new Set(),
+    willRerenderNodes: new Set(),
 
     draggedItemId: null,
     hoveredItemId: null,
@@ -119,7 +122,13 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
 
     // 드래그 종료 (드롭 처리)
     endDrag: () => {
-        const { draggedItemId, hoveredItemId, dropQuadrant, tree } = get();
+        const {
+            draggedItemId,
+            hoveredItemId,
+            dropQuadrant,
+            tree,
+            setWillRerenderNodes,
+        } = get();
 
         // 유효한 드롭인 경우만 처리
         if (
@@ -140,14 +149,19 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
 
             // 4. 변경된 노드만 복제하여 새로운 Map 생성
             const newNodes = cloneAffectedNodes(tree, changedIds);
-            console.log(newNodes);
+
             // 5. Zustand 상태 업데이트
             set({ nodes: newNodes });
 
-            console.log(
-                `Changed nodes (via diff): ${changedIds.size}`,
-                Array.from(changedIds)
-            );
+            const willRenderItemNodes: ChildNode[] = [];
+            for (const key of changedIds) {
+                const temp = newNodes.get(key);
+                if (temp && temp.type === 'item') {
+                    willRenderItemNodes.push(temp);
+                }
+            }
+
+            setWillRerenderNodes(willRenderItemNodes);
         }
 
         // 드래그 상태 초기화
@@ -224,4 +238,13 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     getNode: (id) => {
         return get().nodes.get(id);
     },
+
+    setWillRerenderNodes: (ids: ChildNode[]) =>
+        set({
+            willRerenderNodes: new Set(ids),
+        }),
+    resetWillRerenderNodes: () =>
+        set({
+            willRerenderNodes: new Set(),
+        }),
 }));
