@@ -1,5 +1,5 @@
 import React from 'react';
-import { DndSplitDirection } from './tree';
+import { ChildNode, DndSplitDirection } from './tree';
 export interface ComponentNode {
     type: 'split' | 'item';
     id: number;
@@ -221,7 +221,7 @@ export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
  * @returns React 노드
  */
 export function buildReactTreeFromNode(
-    treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
+    treeNode: ChildNode,
     options: ParseChildrenOptions
 ): React.ReactNode {
     const { DndGridSplit, DndGridItem } = options;

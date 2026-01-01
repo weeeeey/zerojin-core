@@ -430,10 +430,34 @@ export class Tree {
     /**
      * 같은 부모를 공유하는 두 노드의 위치를 교환합니다.
      */
-    private swapSiblings(parent: GridSplit): void {
-        const temp = parent.primaryChild;
-        parent.primaryChild = parent.secondaryChild;
-        parent.secondaryChild = temp;
+    private swapSiblings(
+        parent: GridSplit,
+        dragged: GridItem,
+        dropQuadrant: DropQuadrant
+    ): void {
+        const isDraggedPrimary = parent.primaryChild.id === dragged.id;
+        const direction = getSplitDirection(dropQuadrant);
+        // dropQuadrant가 left/top이고 dragged가 primary면 스왑 불필요
+        parent.direction = direction;
+        if (
+            (dropQuadrant === 'left' || dropQuadrant === 'top') &&
+            isDraggedPrimary
+        ) {
+            return;
+        }
+
+        // dropQuadrant가 right/bottom이고 dragged가 secondary면 스왑 불필요
+        if (
+            (dropQuadrant === 'right' || dropQuadrant === 'bottom') &&
+            !isDraggedPrimary
+        ) {
+            return;
+        }
+
+        [parent.primaryChild, parent.secondaryChild] = [
+            parent.secondaryChild,
+            parent.primaryChild,
+        ];
     }
 
     /**
@@ -460,7 +484,18 @@ export class Tree {
      * 트리의 현재 상태를 스냅샷으로 저장합니다.
      * 나중에 diffTree로 비교할 수 있도록 shallow copy를 만듭니다.
      */
-    createSnapshot(): Map<number, { id: number; width: number; height: number; top: number; left: number; primaryChildId?: number; secondaryChildId?: number }> {
+    createSnapshot(): Map<
+        number,
+        {
+            id: number;
+            width: number;
+            height: number;
+            top: number;
+            left: number;
+            primaryChildId?: number;
+            secondaryChildId?: number;
+        }
+    > {
         const snapshot = new Map();
 
         const traverse = (node: ChildNode) => {
@@ -493,9 +528,7 @@ export class Tree {
      * 스냅샷과 현재 트리를 비교하여 변경된 노드만 찾습니다.
      * React reconciliation 알고리즘처럼 동작합니다.
      */
-    diffWithSnapshot(
-        snapshot: Map<number, any>
-    ): Set<number> {
+    diffWithSnapshot(snapshot: Map<number, any>): Set<number> {
         const changedIds = new Set<number>();
 
         const traverse = (node: ChildNode) => {
@@ -565,7 +598,11 @@ export class Tree {
 
         // 같은 부모를 공유하는 경우: 위치만 교환
         if (dragged.parent === hovered.parent) {
-            this.swapSiblings(dragged.parent);
+            this.swapSiblings(
+                dragged.parent,
+                dragged.node as GridItem,
+                dropQuadrant
+            );
 
             if (this._root.type === 'split') {
                 this.calculateLayout(this._root);
