@@ -1,4 +1,5 @@
 import { ComponentNode, DropQuadrant, getSplitDirection } from './util';
+import React from 'react';
 
 type ITEM = 'item';
 type SPLIT = 'split';
@@ -16,7 +17,7 @@ type ParentWithCurrent = { node: ChildNode; parent: GridSplit | null };
  */
 export function cloneNode(node: ChildNode): ChildNode {
     if (node.type === 'item') {
-        const cloned = new GridItem(node.id);
+        const cloned = new GridItem(node.id, node.children);
         cloned.width = node.width;
         cloned.height = node.height;
         cloned.top = node.top;
@@ -182,6 +183,12 @@ abstract class BaseNode {
 // 렌더링 될 컴포넌트(그리드 아이템)
 export class GridItem extends BaseNode {
     readonly type = 'item' as const;
+    readonly children: React.ReactNode;
+
+    constructor(id: number, children?: React.ReactNode) {
+        super(id);
+        this.children = children;
+    }
 }
 
 // 컴포넌트를 분할 할 보이지 않는 선
@@ -335,7 +342,7 @@ export class Tree {
 
     private buildFromComponentNode(node: ComponentNode): ChildNode {
         if (node.type === 'item') {
-            return new GridItem(node.id);
+            return new GridItem(node.id, node.children);
         } else {
             // 재귀적으로 자식들도 변환
             const primary = this.buildFromComponentNode(node.primary!);
@@ -628,16 +635,29 @@ export class Tree {
         const { parent: draggedGrandParent } = this.findNodeWithParent(
             dragged.parent.id
         )!;
+        // grandParent가 루트인 경우
+
         const siblingDragNode = dragged.parent.isPrimaryChildren(
             dragged.node.id
         )
             ? dragged.parent.secondaryChild
             : dragged.parent.primaryChild;
 
-        if (draggedGrandParent?.isPrimaryChildren(dragged.parent.id)) {
-            draggedGrandParent.primaryChild = siblingDragNode;
+        if (!draggedGrandParent) {
+            siblingDragNode.width = this.root.width;
+            siblingDragNode.height = this.root.height;
+            siblingDragNode.top = 0;
+            siblingDragNode.left = 0;
+
+            this._root = siblingDragNode;
+
+            // this.root = newSplitNode;
         } else {
-            draggedGrandParent!.secondaryChild = siblingDragNode;
+            if (draggedGrandParent?.isPrimaryChildren(dragged.parent.id)) {
+                draggedGrandParent.primaryChild = siblingDragNode;
+            } else {
+                draggedGrandParent!.secondaryChild = siblingDragNode;
+            }
         }
 
         // 5단계: 레이아웃 재계산

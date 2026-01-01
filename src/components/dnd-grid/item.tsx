@@ -4,6 +4,7 @@ import {
 } from '../../actions/dnd-grid/util';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
+// import { useState } from 'react';
 
 interface DndGridItemProps {
     id?: number;
@@ -11,6 +12,7 @@ interface DndGridItemProps {
     left?: number;
     width?: number;
     height?: number;
+    children: React.ReactNode;
 }
 
 // TODO: children 추가하기
@@ -28,7 +30,12 @@ export function DndGridItem({
     left,
     top,
     width,
+    children,
 }: DndGridItemProps) {
+    // console.log(id);
+    // dnd 대상들은 리렌더링으로 인해 상태 초기화 되는 이슈가 있음.
+    // const [num, setNum] = useState(id || 0);
+
     const isDragging = useTreeStore((state) => state.draggedItemId === id);
     const isHovered = useTreeStore(
         (state) => state.hoveredItemId === id && state.draggedItemId !== id
@@ -149,6 +156,7 @@ export function DndGridItem({
                 <div>top:{top}</div>
                 <div>left:{left}</div>
             </div>
+            {children}
         </div>
     );
 }

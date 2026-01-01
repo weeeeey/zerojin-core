@@ -9,6 +9,9 @@ export interface ComponentNode {
     ratio?: number;
     primary?: ComponentNode;
     secondary?: ComponentNode;
+
+    // Item 컴포넌트인 경우
+    children?: React.ReactNode;
 }
 
 interface ParseChildrenOptions {
@@ -78,9 +81,11 @@ export function parseChildren(
 
     // DndGridItem 컴포넌트인 경우
     if (node.type === DndGridItem) {
+        const props = node.props as { children?: React.ReactNode };
         return {
             type: 'item',
             id: nodeId,
+            children: props.children,
         };
     }
 
@@ -107,14 +112,16 @@ export function injectLayoutToChildren(
         return reactNode;
     }
 
-    // DndGridItem인 경우 - id, top, left, width, height 주입
+    // DndGridItem인 경우 - id, top, left, width, height, children 주입
     if (reactNode.type === DndGridItem) {
+        const props = reactNode.props as { children?: React.ReactNode };
         const itemProps = {
             id: treeNode.id,
             top: treeNode.top,
             left: treeNode.left,
             width: treeNode.width,
             height: treeNode.height,
+            children: props.children, // 원본 children 유지
         };
         return React.cloneElement(reactNode, itemProps as any);
     }
@@ -236,6 +243,7 @@ export function buildReactTreeFromNode(
             left: treeNode.left,
             width: treeNode.width,
             height: treeNode.height,
+            children: treeNode.children,
         });
     }
 
