@@ -212,3 +212,54 @@ export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
             return 'vertical';
     }
 }
+
+/**
+ * Tree 노드로부터 직접 React 컴포넌트 트리를 생성
+ * DnD로 구조가 변경되어도 tree.root의 실제 구조를 반영한 React 트리 생성
+ * @param treeNode - Tree의 ChildNode
+ * @param options - 컴포넌트 타입
+ * @returns React 노드
+ */
+export function buildReactTreeFromNode(
+    treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
+    options: ParseChildrenOptions
+): React.ReactNode {
+    const { DndGridSplit, DndGridItem } = options;
+
+    if (!treeNode) return null;
+
+    // Item 노드인 경우
+    if (treeNode.type === 'item') {
+        return React.createElement(DndGridItem, {
+            id: treeNode.id,
+            top: treeNode.top,
+            left: treeNode.left,
+            width: treeNode.width,
+            height: treeNode.height,
+        });
+    }
+
+    // Split 노드인 경우
+    if (treeNode.type === 'split') {
+        const primaryChild = buildReactTreeFromNode(
+            treeNode.primaryChild,
+            options
+        );
+        const secondaryChild = buildReactTreeFromNode(
+            treeNode.secondaryChild,
+            options
+        );
+
+        return React.createElement(
+            DndGridSplit,
+            {
+                id: treeNode.id,
+                direction: treeNode.direction,
+                ratio: treeNode.ratio,
+            },
+            [primaryChild, secondaryChild]
+        );
+    }
+
+    return null;
+}

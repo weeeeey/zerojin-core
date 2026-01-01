@@ -8,6 +8,7 @@ import React, {
 import {
     parseChildren,
     injectLayoutToChildren,
+    buildReactTreeFromNode,
 } from '../../actions/dnd-grid/util';
 
 import { DndGridItem } from './item';
@@ -70,10 +71,8 @@ export function DndGridContainer({
         const tree = useTreeStore.getState().tree;
         if (!tree) return;
 
-        const firstChild = Children.toArray(children)[0];
-
-        // 전체 트리를 다시 주입하여 업데이트된 레이아웃 정보 반영
-        const updatedChildren = injectLayoutToChildren(firstChild, tree.root, {
+        // tree.root로부터 직접 React 트리를 생성하여 구조 변경 반영
+        const updatedChildren = buildReactTreeFromNode(tree.root, {
             DndGridSplit,
             DndGridItem,
         });
