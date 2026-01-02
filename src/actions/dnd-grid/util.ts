@@ -17,6 +17,7 @@ export interface ComponentNode {
 interface ParseChildrenOptions {
     DndGridSplit: React.ComponentType<any>;
     DndGridItem: React.ComponentType<any>;
+    ItemDrag?: React.ComponentType<any>;
 }
 
 /**

@@ -3,20 +3,9 @@
 import { DndGridSplit } from './split';
 import { DndGridItem } from './item';
 import { DndGridContainer } from './container';
-import { useState } from 'react';
 
-function AA() {
-    const [n, sn] = useState(0);
-    return (
-        <div
-            className="bg-blue-500 text-white"
-            onClick={() => sn((v) => v + 1)}
-        >
-            {' '}
-            asdasd{n}
-        </div>
-    );
-}
+import ItemDrag from './item-drag';
+import ItemContent from './item-content';
 
 export default function DndGrid() {
     return (
@@ -24,14 +13,23 @@ export default function DndGrid() {
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
-                        <AA />
+                        <ItemDrag />
+                        <ItemContent>
+                            <div>asd</div>
+                        </ItemContent>
                     </DndGridItem>
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
-                            <AA />
+                            <ItemDrag />
+                            <ItemContent>
+                                <div>asd</div>
+                            </ItemContent>
                         </DndGridItem>
                         <DndGridItem>
-                            <AA />
+                            <ItemDrag />
+                            <ItemContent>
+                                <div>asd</div>
+                            </ItemContent>
                         </DndGridItem>
                     </DndGridSplit>
                 </DndGridSplit>
@@ -39,14 +37,23 @@ export default function DndGrid() {
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridSplit direction="vertical" ratio={0.6}>
                         <DndGridItem>
-                            <AA />
+                            <ItemDrag />
+                            <ItemContent>
+                                <div>asd</div>
+                            </ItemContent>
                         </DndGridItem>
                         <DndGridItem>
-                            <AA />
+                            <ItemDrag />
+                            <ItemContent>
+                                <div>asd</div>
+                            </ItemContent>
                         </DndGridItem>
                     </DndGridSplit>
                     <DndGridItem>
-                        <AA />
+                        <ItemDrag />
+                        <ItemContent>
+                            <div>asd</div>
+                        </ItemContent>
                     </DndGridItem>
                 </DndGridSplit>
             </DndGridSplit>

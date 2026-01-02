@@ -1,6 +1,5 @@
 import React, {
-    Children,
-    useEffect,
+    useCallback,
     useLayoutEffect,
     useRef,
     useState,
@@ -34,52 +33,53 @@ export function DndGridContainer({
     const willRerenderNodes = useTreeStore((state) => state.willRerenderNodes);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // 초기 렌더링 시 DOM에 삽입 전 자식 컴포넌트들에게 id 값 부여
-    useLayoutEffect(() => {
-        const firstChild = Children.toArray(children)[0];
+    // 트리 빌드 및 렌더링 로직 통합
+    const rebuildTree = useCallback(() => {
+        const tree = useTreeStore.getState().tree;
 
-        const componentTree = parseChildren(firstChild, {
-            DndGridSplit,
-            DndGridItem,
-        });
+        if (!tree) {
+            // 초기 빌드
+            const componentTree = parseChildren(children, {
+                DndGridSplit,
+                DndGridItem,
+            });
 
-        if (!componentTree) {
-            console.error('Failed to parse component tree');
-            return;
+            if (!componentTree) {
+                console.error('Failed to parse component tree');
+                return;
+            }
+
+            const newTree = buildTree(componentTree, width, height);
+            const injected = injectLayoutToChildren(children, newTree.root, {
+                DndGridSplit,
+                DndGridItem,
+            });
+            setEnhancedChildren(injected);
+        } else {
+            // DnD 후 재빌드
+            const updated = buildReactTreeFromNode(tree.root, {
+                DndGridSplit,
+                DndGridItem,
+            });
+            setEnhancedChildren(updated);
         }
+    }, [children, width, height, buildTree]);
 
-        const tree = buildTree(componentTree, width, height);
-
-        const injectedChildren = injectLayoutToChildren(firstChild, tree.root, {
-            DndGridSplit,
-            DndGridItem,
-        });
-
-        setEnhancedChildren(injectedChildren);
-    }, []);
-
-    // dnd 작업 시 mouse의 상대적인 위치값을 위한 등록
-    useEffect(() => {
+    // 초기화 및 containerRef 설정 통합
+    useLayoutEffect(() => {
         if (containerRef.current) {
             setContainerRef(containerRef);
         }
-    }, [setContainerRef]);
+        rebuildTree();
+    }, [rebuildTree, setContainerRef]);
 
+    // DnD 후 리렌더링만 처리
     useLayoutEffect(() => {
         if (willRerenderNodes.size === 0) return;
 
-        const tree = useTreeStore.getState().tree;
-        if (!tree) return;
-
-        // tree.root로부터 직접 React 트리를 생성하여 구조 변경 반영
-        const updatedChildren = buildReactTreeFromNode(tree.root, {
-            DndGridSplit,
-            DndGridItem,
-        });
-
-        setEnhancedChildren(updatedChildren);
+        rebuildTree();
         resetWillRerenderNodes();
-    }, [willRerenderNodes, resetWillRerenderNodes]);
+    }, [willRerenderNodes, resetWillRerenderNodes, rebuildTree]);
 
     return (
         <div

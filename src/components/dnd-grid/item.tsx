@@ -4,6 +4,9 @@ import {
 } from '../../actions/dnd-grid/util';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
+import { useMemo } from 'react';
+import React from 'react';
+import ItemDrag from './item-drag';
 // import { useState } from 'react';
 
 interface DndGridItemProps {
@@ -132,6 +135,16 @@ export function DndGridItem({
         }
     };
 
+    // children을 순회하면서 ItemDrag 컴포넌트에 id를 주입
+    const processedChildren = useMemo(() => {
+        return React.Children.map(children, (child) => {
+            if (React.isValidElement(child) && child.type === ItemDrag) {
+                return React.cloneElement(child, { id } as any);
+            }
+            return child;
+        });
+    }, [id]);
+
     return (
         <div
             onMouseDown={handleMouseDown}
@@ -156,7 +169,7 @@ export function DndGridItem({
                 <div>top:{top}</div>
                 <div>left:{left}</div>
             </div>
-            {children}
+            {processedChildren}
         </div>
     );
 }
