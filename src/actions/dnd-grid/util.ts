@@ -1,5 +1,7 @@
 import React from 'react';
 import { ChildNode, DndSplitDirection } from './tree';
+import { useTreeStore } from './store';
+
 export interface ComponentNode {
     type: 'split' | 'item';
     id: number;
@@ -32,7 +34,7 @@ export function parseChildren(
     options: ParseChildrenOptions,
     parentId: number = 0
 ): ComponentNode | null {
-    const { DndGridSplit, DndGridItem } = options;
+    const { DndGridSplit } = options;
 
     if (!React.isValidElement(node)) {
         return null;
@@ -81,18 +83,25 @@ export function parseChildren(
     }
 
     // DndGridItem 컴포넌트인 경우
-    if (node.type === DndGridItem) {
-        const props = node.props as { children?: React.ReactNode };
-        return {
-            type: 'item',
-            id: nodeId,
-            children: props.children,
-        };
+    const props = node.props as { children?: React.ReactNode };
+
+    // children을 캐시에 저장
+    const saveChildrenToCache = useTreeStore.getState().saveChildrenToCache;
+    if (props.children) {
+        saveChildrenToCache(nodeId, props.children);
     }
 
-    // 알 수 없는 컴포넌트
-    console.warn('Unknown component type:', node.type);
-    return null;
+    return {
+        type: 'item',
+        id: nodeId,
+        children: props.children,
+    };
+    // if (node.type === DndGridItem) {
+    // }
+
+    // // 알 수 없는 컴포넌트
+    // console.warn('Unknown component type:', node.type);
+    // return null;
 }
 
 /**
@@ -238,13 +247,18 @@ export function buildReactTreeFromNode(
 
     // Item 노드인 경우
     if (treeNode.type === 'item') {
+        // 캐시된 children을 사용하여 원본 참조 유지
+        const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+        const cachedChildren = getChildrenFromCache(treeNode.id);
+
         return React.createElement(DndGridItem, {
+            key: treeNode.id,
             id: treeNode.id,
             top: treeNode.top,
             left: treeNode.left,
             width: treeNode.width,
             height: treeNode.height,
-            children: treeNode.children,
+            children: cachedChildren ?? treeNode.children,
         });
     }
 
@@ -262,6 +276,7 @@ export function buildReactTreeFromNode(
         return React.createElement(
             DndGridSplit,
             {
+                key: treeNode.id,
                 id: treeNode.id,
                 direction: treeNode.direction,
                 ratio: treeNode.ratio,

@@ -1,13 +1,8 @@
-import {
-    getQuadrantPosition,
-    getQuadrantShadow,
-} from '../../actions/dnd-grid/util';
+import { getQuadrantShadow } from '../../actions/dnd-grid/util';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
 import { useMemo } from 'react';
 import React from 'react';
-import ItemDrag from './item-drag';
-// import { useState } from 'react';
 
 interface DndGridItemProps {
     id?: number;
@@ -18,15 +13,6 @@ interface DndGridItemProps {
     children: React.ReactNode;
 }
 
-// TODO: children 추가하기
-/**
-[사용 흐름]
-1. mousedown → startDrag(id)
-2. mousemove (throttled) → setDropQuadrant(quadrant)
-3. mouseenter/leave → setHoveredItem(id | null)
-4. mouseup → store.handleDrop 호출
- */
-
 export function DndGridItem({
     id,
     height,
@@ -35,10 +21,6 @@ export function DndGridItem({
     width,
     children,
 }: DndGridItemProps) {
-    // console.log(id);
-    // dnd 대상들은 리렌더링으로 인해 상태 초기화 되는 이슈가 있음.
-    // const [num, setNum] = useState(id || 0);
-
     const isDragging = useTreeStore((state) => state.draggedItemId === id);
     const isHovered = useTreeStore(
         (state) => state.hoveredItemId === id && state.draggedItemId !== id
@@ -47,76 +29,7 @@ export function DndGridItem({
         state.hoveredItemId === id ? state.dropQuadrant : null
     );
 
-    const startDrag = useTreeStore((state) => state.startDrag);
-    const endDrag = useTreeStore((state) => state.endDrag);
     const setHoveredItem = useTreeStore((state) => state.setHoveredItem);
-    const setDropQuadrant = useTreeStore((state) => state.setDropQuadrant);
-
-    // if (!height || !left || !top || !width) {
-    //     throw new Error('grid item 생성 실패');
-    // }
-
-    const handleMouseDown = () => {
-        if (!id) return;
-
-        startDrag(id);
-
-        let lastMoveTime = 0;
-        const THROTTLE_MS = 16; // 60fps
-
-        const handleMouseMove = (e: MouseEvent) => {
-            const now = Date.now();
-
-            // Throttle: 16ms 이내면 건너뛰기
-            if (now - lastMoveTime < THROTTLE_MS) return;
-            lastMoveTime = now;
-
-            // 현재 호버된 아이템의 노드 정보 가져오기
-            const state = useTreeStore.getState();
-            const hoveredNode = state.hoveredItemId
-                ? state.nodes.get(state.hoveredItemId)
-                : null;
-
-            if (!hoveredNode) {
-                setDropQuadrant(null);
-                return;
-            }
-
-            // Container의 뷰포트 기준 위치 가져오기
-            const containerRect =
-                state.containerRef?.current?.getBoundingClientRect();
-            if (!containerRect) {
-                setDropQuadrant(null);
-                return;
-            }
-
-            // 마우스 좌표를 Container 기준 상대 좌표로 변환
-            const relativeX = e.clientX - containerRect.left;
-            const relativeY = e.clientY - containerRect.top;
-
-            // 사분면 계산 (이제 같은 좌표계)
-            const quadrant = getQuadrantPosition({
-                mouseX: relativeX,
-                mouseY: relativeY,
-                startLeft: hoveredNode.left,
-                startTop: hoveredNode.top,
-                width: hoveredNode.width,
-                height: hoveredNode.height,
-            });
-
-            setDropQuadrant(quadrant);
-        };
-
-        const handleMouseUp = () => {
-            endDrag();
-
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
-    };
 
     const handleMouseEnter = () => {
         const state = useTreeStore.getState(); // 이벤트 시점의 최신값 가져오기
@@ -135,19 +48,41 @@ export function DndGridItem({
         }
     };
 
-    // children을 순회하면서 ItemDrag 컴포넌트에 id를 주입
+    // children을 순회하면서 필요한 컴포넌트에만 props 주입
     const processedChildren = useMemo(() => {
+        console.log('rerender item', id);
+
         return React.Children.map(children, (child) => {
-            if (React.isValidElement(child) && child.type === ItemDrag) {
-                return React.cloneElement(child, { id } as any);
+            if (!React.isValidElement(child)) {
+                return child;
             }
-            return child;
+
+            // displayName이 'ItemContent'인 경우
+            const displayName = (child.type as any)?.displayName;
+
+            if (displayName === 'ItemContent') {
+                const childProps = child.props as any;
+
+                // children 참조가 동일하고 id도 동일하면 원본 참조 반환 (cloneElement 방지)
+                if (childProps.id === id) {
+                    return child;
+                }
+
+                // id만 다른 경우에만 cloneElement (초기 렌더링 시)
+                return React.cloneElement(child, {
+                    id,
+                    key: `content-${id}`,
+                } as any);
+            }
+
+            // 다른 컴포넌트(ItemDrag 등)는 id 주입
+            return React.cloneElement(child, { id } as any);
         });
-    }, [id]);
+    }, [id, children]);
 
     return (
         <div
-            onMouseDown={handleMouseDown}
+            key={id}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             style={{
@@ -162,6 +97,7 @@ export function DndGridItem({
                 cursor: isDragging ? 'grabbing' : 'grab',
                 opacity: isDragging ? 0.5 : 1,
                 boxShadow: isHovered ? getQuadrantShadow(dropQuadrant) : '',
+                overflow: 'hidden',
             }}
         >
             Item {id} ({width}x{height})

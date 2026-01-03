@@ -68,7 +68,7 @@ function ItemDrag({ id }: { id?: number }) {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     };
-    return <div>ItemDrag {id}</div>;
+    return <div onMouseDown={handleMouseDown}>ItemDrag {id}</div>;
 }
 
 export default ItemDrag;

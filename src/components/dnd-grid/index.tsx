@@ -6,6 +6,13 @@ import { DndGridContainer } from './container';
 
 import ItemDrag from './item-drag';
 import ItemContent from './item-content';
+import { useState } from 'react';
+
+function AA() {
+    const [a, aa] = useState(0);
+
+    return <div onClick={() => aa((v) => v + 1)}>{a}</div>;
+}
 
 export default function DndGrid() {
     return (
@@ -15,14 +22,14 @@ export default function DndGrid() {
                     <DndGridItem>
                         <ItemDrag />
                         <ItemContent>
-                            <div>asd</div>
+                            <AA />
                         </ItemContent>
                     </DndGridItem>
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
                             <ItemDrag />
                             <ItemContent>
-                                <div>asd</div>
+                                <AA />
                             </ItemContent>
                         </DndGridItem>
                         <DndGridItem>
