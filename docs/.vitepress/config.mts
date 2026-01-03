@@ -27,6 +27,16 @@ export default defineConfig({
                 text: 'API',
                 items: [
                     {
+                        text: '컴포넌트',
+                        items: [
+                            { text: '개요', link: '/api/components/' },
+                            {
+                                text: 'dnd-grid',
+                                link: '/api/components/dnd-grid',
+                            },
+                        ],
+                    },
+                    {
                         text: '훅',
                         items: [
                             { text: '개요', link: '/api/hooks/' },
