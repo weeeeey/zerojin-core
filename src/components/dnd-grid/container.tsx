@@ -5,12 +5,11 @@ import {
     collectAllItems,
 } from '../../actions/dnd-grid/util';
 
-import DndGridItem from './item';
-import DndGridSplit from './split';
+import { DndGridItem, DndGridSplit } from './';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
 
-export default function DndGridContainer({
+export function DndGridContainer({
     width,
     height,
     children,

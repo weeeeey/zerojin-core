@@ -14,7 +14,7 @@ interface DndGridItemProps {
     children: React.ReactNode;
 }
 
-export default function DndGridItem({
+export function DndGridItem({
     id,
     height,
     left,

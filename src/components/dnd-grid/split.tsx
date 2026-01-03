@@ -9,11 +9,7 @@ interface DndGridSplitProps {
     id?: number;
 }
 
-export default function DndGridSplit({
-    children,
-    ratio,
-    id,
-}: DndGridSplitProps) {
+export function DndGridSplit({ children, ratio, id }: DndGridSplitProps) {
     const node = useTreeStore((state) =>
         id ? state.nodes.get(id) : undefined
     );
