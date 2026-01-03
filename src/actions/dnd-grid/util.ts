@@ -118,65 +118,65 @@ export function parseChildren(
  * @param options - 컴포넌트 타입 판별을 위한 옵션
  * @returns ID props가 주입된 React 노드
  */
-export function injectLayoutToChildren(
-    reactNode: React.ReactNode,
-    treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
-    options: ParseChildrenOptions
-): React.ReactNode {
-    const { DndGridSplit, DndGridItem } = options;
+// export function injectLayoutToChildren(
+//     reactNode: React.ReactNode,
+//     treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
+//     options: ParseChildrenOptions
+// ): React.ReactNode {
+//     const { DndGridSplit, DndGridItem } = options;
 
-    if (!React.isValidElement(reactNode)) {
-        return reactNode;
-    }
+//     if (!React.isValidElement(reactNode)) {
+//         return reactNode;
+//     }
 
-    // DndGridItem인 경우 - id, top, left, width, height, children 주입
-    if (reactNode.type === DndGridItem) {
-        const props = reactNode.props as { children?: React.ReactNode };
-        const itemProps = {
-            id: treeNode.id,
-            top: treeNode.top,
-            left: treeNode.left,
-            width: treeNode.width,
-            height: treeNode.height,
-            children: props.children, // 원본 children 유지
-        };
-        return React.cloneElement(reactNode, itemProps as any);
-    }
+//     // DndGridItem인 경우 - id, top, left, width, height, children 주입
+//     if (reactNode.type === DndGridItem) {
+//         const props = reactNode.props as { children?: React.ReactNode };
+//         const itemProps = {
+//             id: treeNode.id,
+//             top: treeNode.top,
+//             left: treeNode.left,
+//             width: treeNode.width,
+//             height: treeNode.height,
+//             children: props.children, // 원본 children 유지
+//         };
+//         return React.cloneElement(reactNode, itemProps as any);
+//     }
 
-    // DndGridSplit인 경우 - id만 주입
-    const idProps = {
-        id: treeNode.id,
-    };
+//     // DndGridSplit인 경우 - id만 주입
+//     const idProps = {
+//         id: treeNode.id,
+//     };
 
-    // DndGridSplit인 경우
-    if (reactNode.type === DndGridSplit && treeNode.type === 'split') {
-        const props = reactNode.props as { children: React.ReactNode };
-        const childrenArray = React.Children.toArray(props.children);
+//     // DndGridSplit인 경우
+//     if (reactNode.type === DndGridSplit && treeNode.type === 'split') {
+//         const props = reactNode.props as { children: React.ReactNode };
+//         const childrenArray = React.Children.toArray(props.children);
 
-        if (childrenArray.length !== 2) {
-            console.warn('DndGridSplit should have exactly 2 children');
-            return reactNode;
-        }
+//         if (childrenArray.length !== 2) {
+//             console.warn('DndGridSplit should have exactly 2 children');
+//             return reactNode;
+//         }
 
-        return React.cloneElement(reactNode, {
-            ...idProps,
-            children: [
-                injectLayoutToChildren(
-                    childrenArray[0],
-                    treeNode.primaryChild,
-                    options
-                ),
-                injectLayoutToChildren(
-                    childrenArray[1],
-                    treeNode.secondaryChild,
-                    options
-                ),
-            ],
-        } as any);
-    }
+//         return React.cloneElement(reactNode, {
+//             ...idProps,
+//             children: [
+//                 injectLayoutToChildren(
+//                     childrenArray[0],
+//                     treeNode.primaryChild,
+//                     options
+//                 ),
+//                 injectLayoutToChildren(
+//                     childrenArray[1],
+//                     treeNode.secondaryChild,
+//                     options
+//                 ),
+//             ],
+//         } as any);
+//     }
 
-    return reactNode;
-}
+//     return reactNode;
+// }
 
 export type DropQuadrant = 'top' | 'left' | 'right' | 'bottom';
 

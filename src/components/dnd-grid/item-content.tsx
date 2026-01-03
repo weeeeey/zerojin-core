@@ -1,9 +1,9 @@
 import { memo } from 'react';
 
 const DndGridItemContent = memo(
-    ({ children, id }: { children: React.ReactNode; id: number }) => {
+    ({ children }: { children: React.ReactNode }) => {
         // console.log('ItemContent rendered, id:', id);
-        return <div key={`content-${id}`}>{children}</div>;
+        return <div>{children}</div>;
     }
 );
 

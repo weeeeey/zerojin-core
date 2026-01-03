@@ -1,9 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import {
-    parseChildren,
-    injectLayoutToChildren,
-    collectAllItems,
-} from '../../actions/dnd-grid/util';
+import { parseChildren, collectAllItems } from '../../actions/dnd-grid/util';
 
 import { DndGridItem, DndGridSplit } from './';
 
@@ -43,37 +39,24 @@ export function DndGridContainer({
                 return;
             }
 
-            const newTree = buildTree(componentTree, width, height);
-            const injected = injectLayoutToChildren(children, newTree.root, {
-                DndGridSplit,
-                DndGridItem,
-            });
-            setEnhancedChildren(injected);
-        } else {
-            // DnD 후: 모든 Item을 flat하게 렌더링
-            const items = collectAllItems(tree.root);
-            const getElementFromCache =
-                useTreeStore.getState().getElementFromCache;
-            const getChildrenFromCache =
-                useTreeStore.getState().getChildrenFromCache;
+            buildTree(componentTree, width, height);
+        }
 
-            const renderedItems = items.map((item) => {
-                const cachedElement = getElementFromCache(item.id);
-                const cachedChildren = getChildrenFromCache(item.id);
+        // 초기 렌더링과 DnD 후 모두 flat 렌더링 사용
+        const currentTree = useTreeStore.getState().tree;
+        if (!currentTree) return;
 
-                if (cachedElement) {
-                    return React.cloneElement(cachedElement, {
-                        key: item.id,
-                        id: item.id,
-                        top: item.top,
-                        left: item.left,
-                        width: item.width,
-                        height: item.height,
-                        children: cachedChildren,
-                    } as any);
-                }
+        const items = collectAllItems(currentTree.root);
+        const getElementFromCache = useTreeStore.getState().getElementFromCache;
+        const getChildrenFromCache =
+            useTreeStore.getState().getChildrenFromCache;
 
-                return React.createElement(DndGridItem, {
+        const renderedItems = items.map((item) => {
+            const cachedElement = getElementFromCache(item.id);
+            const cachedChildren = getChildrenFromCache(item.id);
+
+            if (cachedElement) {
+                return React.cloneElement(cachedElement, {
                     key: item.id,
                     id: item.id,
                     top: item.top,
@@ -81,11 +64,21 @@ export function DndGridContainer({
                     width: item.width,
                     height: item.height,
                     children: cachedChildren,
-                });
-            });
+                } as any);
+            }
 
-            setEnhancedChildren(renderedItems);
-        }
+            return React.createElement(DndGridItem, {
+                key: item.id,
+                id: item.id,
+                top: item.top,
+                left: item.left,
+                width: item.width,
+                height: item.height,
+                children: cachedChildren,
+            });
+        });
+
+        setEnhancedChildren(renderedItems);
     }, [children, width, height, buildTree]);
 
     // 초기화 및 containerRef 설정 통합
