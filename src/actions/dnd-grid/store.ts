@@ -21,6 +21,7 @@ interface TreeStore extends DragDropStore {
     nodes: Map<number, ChildNode>;
     willRerenderNodes: Set<ChildNode>;
     childrenCache: Map<number, React.ReactNode>;
+    elementsCache: Map<number, React.ReactElement>;
 
     buildTree: (
         componentTree: ComponentNode,
@@ -34,6 +35,8 @@ interface TreeStore extends DragDropStore {
     resetWillRerenderNodes: () => void;
     saveChildrenToCache: (id: number, children: React.ReactNode) => void;
     getChildrenFromCache: (id: number) => React.ReactNode | undefined;
+    saveElementToCache: (id: number, element: React.ReactElement) => void;
+    getElementFromCache: (id: number) => React.ReactElement | undefined;
 }
 
 /**
@@ -109,6 +112,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     nodes: new Map(),
     willRerenderNodes: new Set(),
     childrenCache: new Map(),
+    elementsCache: new Map(),
 
     draggedItemId: null,
     hoveredItemId: null,
@@ -259,5 +263,14 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     },
     getChildrenFromCache: (id) => {
         return get().childrenCache.get(id);
+    },
+
+    // Element 캐시 관리
+    saveElementToCache: (id, element) => {
+        const { elementsCache } = get();
+        elementsCache.set(id, element);
+    },
+    getElementFromCache: (id) => {
+        return get().elementsCache.get(id);
     },
 }));

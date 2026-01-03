@@ -72,6 +72,10 @@ export function parseChildren(
             return null;
         }
 
+        // 원본 Split 엘리먼트를 캐시에 저장
+        const saveElementToCache = useTreeStore.getState().saveElementToCache;
+        saveElementToCache(nodeId, node);
+
         return {
             type: 'split',
             id: nodeId,
@@ -85,8 +89,11 @@ export function parseChildren(
     // DndGridItem 컴포넌트인 경우
     const props = node.props as { children?: React.ReactNode };
 
-    // children을 캐시에 저장
+    // 원본 Item 엘리먼트와 children을 캐시에 저장
     const saveChildrenToCache = useTreeStore.getState().saveChildrenToCache;
+    const saveElementToCache = useTreeStore.getState().saveElementToCache;
+
+    saveElementToCache(nodeId, node);
     if (props.children) {
         saveChildrenToCache(nodeId, props.children);
     }
@@ -231,8 +238,30 @@ export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
 }
 
 /**
- * Tree 노드로부터 직접 React 컴포넌트 트리를 생성
+ * Tree를 순회하여 모든 Item 노드를 flat array로 수집
+ * @param treeNode - Tree의 루트 노드
+ * @returns 모든 Item 노드의 배열
+ */
+export function collectAllItems(treeNode: ChildNode): ChildNode[] {
+    const items: ChildNode[] = [];
+
+    const traverse = (node: ChildNode) => {
+        if (node.type === 'item') {
+            items.push(node);
+        } else if (node.type === 'split') {
+            traverse(node.primaryChild);
+            traverse(node.secondaryChild);
+        }
+    };
+
+    traverse(treeNode);
+    return items;
+}
+
+/**
+ * Tree 노드로부터 React 컴포넌트 트리를 생성 (원본 엘리먼트 참조 보존)
  * DnD로 구조가 변경되어도 tree.root의 실제 구조를 반영한 React 트리 생성
+ * cloneElement를 사용하여 원본 엘리먼트 참조를 유지하고 layout props만 업데이트
  * @param treeNode - Tree의 ChildNode
  * @param options - 컴포넌트 타입
  * @returns React 노드
@@ -245,12 +274,28 @@ export function buildReactTreeFromNode(
 
     if (!treeNode) return null;
 
+    const getElementFromCache = useTreeStore.getState().getElementFromCache;
+    const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+
     // Item 노드인 경우
     if (treeNode.type === 'item') {
-        // 캐시된 children을 사용하여 원본 참조 유지
-        const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+        const cachedElement = getElementFromCache(treeNode.id);
         const cachedChildren = getChildrenFromCache(treeNode.id);
 
+        // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
+        if (cachedElement) {
+            return React.cloneElement(cachedElement, {
+                key: treeNode.id,
+                id: treeNode.id,
+                top: treeNode.top,
+                left: treeNode.left,
+                width: treeNode.width,
+                height: treeNode.height,
+                children: cachedChildren ?? treeNode.children,
+            } as any);
+        }
+
+        // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
         return React.createElement(DndGridItem, {
             key: treeNode.id,
             id: treeNode.id,
@@ -273,6 +318,23 @@ export function buildReactTreeFromNode(
             options
         );
 
+        const cachedElement = getElementFromCache(treeNode.id);
+
+        // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
+        if (cachedElement) {
+            return React.cloneElement(
+                cachedElement,
+                {
+                    key: treeNode.id,
+                    id: treeNode.id,
+                    direction: treeNode.direction,
+                    ratio: treeNode.ratio,
+                } as any,
+                [primaryChild, secondaryChild]
+            );
+        }
+
+        // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
         return React.createElement(
             DndGridSplit,
             {

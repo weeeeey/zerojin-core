@@ -1,7 +1,7 @@
 import { useTreeStore } from '../../actions/dnd-grid/store';
 import { getQuadrantPosition } from '../../actions/dnd-grid/util';
 
-function ItemDrag({ id }: { id?: number }) {
+function ItemDrag({ id }: { id: number }) {
     const startDrag = useTreeStore((state) => state.startDrag);
     const endDrag = useTreeStore((state) => state.endDrag);
 

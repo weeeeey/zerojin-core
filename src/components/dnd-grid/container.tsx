@@ -1,13 +1,8 @@
-import React, {
-    useCallback,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
     parseChildren,
     injectLayoutToChildren,
-    buildReactTreeFromNode,
+    collectAllItems,
 } from '../../actions/dnd-grid/util';
 
 import { DndGridItem } from './item';
@@ -56,12 +51,41 @@ export function DndGridContainer({
             });
             setEnhancedChildren(injected);
         } else {
-            // DnD 후 재빌드
-            const updated = buildReactTreeFromNode(tree.root, {
-                DndGridSplit,
-                DndGridItem,
+            // DnD 후: 모든 Item을 flat하게 렌더링
+            const items = collectAllItems(tree.root);
+            const getElementFromCache =
+                useTreeStore.getState().getElementFromCache;
+            const getChildrenFromCache =
+                useTreeStore.getState().getChildrenFromCache;
+
+            const renderedItems = items.map((item) => {
+                const cachedElement = getElementFromCache(item.id);
+                const cachedChildren = getChildrenFromCache(item.id);
+
+                if (cachedElement) {
+                    return React.cloneElement(cachedElement, {
+                        key: item.id,
+                        id: item.id,
+                        top: item.top,
+                        left: item.left,
+                        width: item.width,
+                        height: item.height,
+                        children: cachedChildren ?? item.children,
+                    } as any);
+                }
+
+                return React.createElement(DndGridItem, {
+                    key: item.id,
+                    id: item.id,
+                    top: item.top,
+                    left: item.left,
+                    width: item.width,
+                    height: item.height,
+                    children: cachedChildren ?? item.children,
+                });
             });
-            setEnhancedChildren(updated);
+
+            setEnhancedChildren(renderedItems);
         }
     }, [children, width, height, buildTree]);
 

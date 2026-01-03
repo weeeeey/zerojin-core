@@ -1,8 +1,9 @@
 import { getQuadrantShadow } from '../../actions/dnd-grid/util';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
-import { useMemo } from 'react';
-import React from 'react';
+import ItemDrag from './item-drag';
+// import { useMemo } from 'react';
+// import React from 'react';
 
 interface DndGridItemProps {
     id?: number;
@@ -49,36 +50,36 @@ export function DndGridItem({
     };
 
     // children을 순회하면서 필요한 컴포넌트에만 props 주입
-    const processedChildren = useMemo(() => {
-        console.log('rerender item', id);
+    // const processedChildren = useMemo(() => {
+    //     console.log('rerender item', id);
 
-        return React.Children.map(children, (child) => {
-            if (!React.isValidElement(child)) {
-                return child;
-            }
+    //     return React.Children.map(children, (child) => {
+    //         if (!React.isValidElement(child)) {
+    //             return child;
+    //         }
 
-            // displayName이 'ItemContent'인 경우
-            const displayName = (child.type as any)?.displayName;
+    //         // displayName이 'ItemContent'인 경우
+    //         const displayName = (child.type as any)?.displayName;
 
-            if (displayName === 'ItemContent') {
-                const childProps = child.props as any;
+    //         if (displayName === 'ItemContent') {
+    //             const childProps = child.props as any;
 
-                // children 참조가 동일하고 id도 동일하면 원본 참조 반환 (cloneElement 방지)
-                if (childProps.id === id) {
-                    return child;
-                }
+    //             // children 참조가 동일하고 id도 동일하면 원본 참조 반환 (cloneElement 방지)
+    //             if (childProps.id === id) {
+    //                 return child;
+    //             }
 
-                // id만 다른 경우에만 cloneElement (초기 렌더링 시)
-                return React.cloneElement(child, {
-                    id,
-                    key: `content-${id}`,
-                } as any);
-            }
+    //             // id만 다른 경우에만 cloneElement (초기 렌더링 시)
+    //             return React.cloneElement(child, {
+    //                 id,
+    //                 key: `content-${id}`,
+    //             } as any);
+    //         }
 
-            // 다른 컴포넌트(ItemDrag 등)는 id 주입
-            return React.cloneElement(child, { id } as any);
-        });
-    }, [id, children]);
+    //         // 다른 컴포넌트(ItemDrag 등)는 id 주입
+    //         return React.cloneElement(child, { id } as any);
+    //     });
+    // }, [id, children]);
 
     return (
         <div
@@ -105,7 +106,8 @@ export function DndGridItem({
                 <div>top:{top}</div>
                 <div>left:{left}</div>
             </div>
-            {processedChildren}
+            <ItemDrag id={id || 10} />
+            {children}
         </div>
     );
 }
