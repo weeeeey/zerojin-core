@@ -5,12 +5,12 @@ import {
     collectAllItems,
 } from '../../actions/dnd-grid/util';
 
-import { DndGridItem } from './item';
-import { DndGridSplit } from './split';
+import DndGridItem from './item';
+import DndGridSplit from './split';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';
 
-export function DndGridContainer({
+export default function DndGridContainer({
     width,
     height,
     children,
@@ -70,7 +70,7 @@ export function DndGridContainer({
                         left: item.left,
                         width: item.width,
                         height: item.height,
-                        children: cachedChildren ?? item.children,
+                        children: cachedChildren,
                     } as any);
                 }
 
@@ -81,7 +81,7 @@ export function DndGridContainer({
                     left: item.left,
                     width: item.width,
                     height: item.height,
-                    children: cachedChildren ?? item.children,
+                    children: cachedChildren,
                 });
             });
 
