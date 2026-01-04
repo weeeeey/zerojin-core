@@ -1400,11 +1400,187 @@ React 컴포넌트 상태를 보존하려면:
 
 단순히 참조만 보존하는 것이 아니라, React가 인식하는 **트리 구조를 일관되게 유지**하는 것이 핵심입니다.
 
-## 참고 자료
+---
 
--   [React Reconciliation](https://react.dev/learn/preserving-and-resetting-state)
--   [React Keys](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key)
--   [React.cloneElement](https://react.dev/reference/react/cloneElement)
+## Next.js App Router 환경에서의 초기화 문제
+
+### 문제 상황 (Next.js App Router)
+
+Next.js App Router 환경에서 **첫 번째 DnD 실행 시** Item Content 컴포넌트 내부의 사용자 정의 컴포넌트 상태가 초기화되는 문제가 발생했습니다.
+
+```tsx
+// app/page.tsx
+function UserComponent() {
+    const [count, setCount] = useState(0);
+    return <div onClick={() => setCount(v => v + 1)}>{count}</div>;
+}
+
+export default function Page() {
+    return (
+        <DndGridContainer width={800} height={600}>
+            <DndGridItem>
+                <UserComponent /> {/* 첫 DnD 후 count가 0으로 리셋 */}
+            </DndGridItem>
+        </DndGridContainer>
+    );
+}
+```
+
+**증상:**
+- 첫 번째 DnD 전: `<UserComponent />`를 클릭하여 count를 5까지 증가
+- 첫 번째 DnD 실행: Item을 다른 위치로 드래그
+- DnD 후: count가 0으로 초기화 (이후 DnD에서는 정상 작동)
+
+### 원인 분석
+
+Next.js App Router는 기본적으로 모든 컴포넌트를 **Server Component**로 취급합니다. DndGrid는 다음과 같은 클라이언트 측 기능을 사용합니다:
+
+1. **이벤트 핸들러** (`onMouseDown`, `onMouseMove`, `onMouseUp`)
+2. **React Hooks** (`useState`, `useEffect`, `useCallback`)
+3. **Zustand Store** (클라이언트 전역 상태)
+4. **브라우저 API** (`MouseEvent`, DOM 조작)
+
+#### Hydration Mismatch 발생
+
+```
+1. 서버에서 Server Component로 렌더링
+   ↓
+2. 클라이언트로 HTML 전송
+   ↓
+3. 클라이언트에서 React hydration 시도
+   ↓
+4. DnD 이벤트 발생 → Zustand store 업데이트
+   ↓
+5. 상태 불일치 감지 (서버 렌더링 결과 ≠ 클라이언트 상태)
+   ↓
+6. React가 안전을 위해 컴포넌트 리마운트
+   ↓
+7. 사용자 컴포넌트 상태 초기화 발생
+```
+
+#### 핵심 문제점
+
+- **Server Component**는 서버에서 한 번 렌더링되고, 클라이언트에서 hydrate됨
+- Zustand store는 **클라이언트 전용** 상태 관리 라이브러리
+- 첫 DnD 시 서버 렌더링 결과와 클라이언트 상태 간 불일치 발생
+- React가 hydration mismatch를 감지하고 컴포넌트를 재마운트
+- 이후 DnD부터는 이미 클라이언트 상태로 완전히 전환되어 정상 작동
+
+### 해결 방법
+
+모든 DndGrid 관련 컴포넌트에 `"use client"` 지시문을 추가하여 **Client Component**로 명시합니다.
+
+#### 수정한 컴포넌트
+
+```typescript
+// src/components/dnd-grid/container.tsx
+"use client";
+
+export function DndGridContainer({ children, width, height }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/split.tsx
+"use client";
+
+export function DndGridSplit({ children, direction, ratio }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/item.tsx
+"use client";
+
+export function DndGridItem({ children, id, top, left, width, height }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/item-content.tsx
+"use client";
+
+export function ItemContent({ id, children }: Props) {
+    // ... 기존 코드
+}
+```
+
+### "use client"가 필요한 이유
+
+#### 1. 이벤트 핸들러 바인딩
+
+```typescript
+// Server Component에서는 작동하지 않음
+<div onMouseDown={handleMouseDown}>
+```
+
+#### 2. React Hooks 사용
+
+```typescript
+// Server Component에서 불가능
+const [draggedItemId, setDraggedItemId] = useState(null);
+```
+
+#### 3. Zustand Store 접근
+
+```typescript
+// 클라이언트 전용 전역 상태
+const { tree, draggedItemId } = useTreeStore();
+```
+
+#### 4. 브라우저 API 사용
+
+```typescript
+// window, document 등은 서버에 존재하지 않음
+const rect = element.getBoundingClientRect();
+```
+
+### 결과
+
+#### ✅ 문제 해결
+
+- **상태 보존:** 첫 번째 DnD 실행 시에도 사용자 컴포넌트 상태 유지
+- **Hydration 안정화:** 서버-클라이언트 불일치 제거
+- **일관된 동작:** 모든 DnD 동작이 동일하게 작동
+
+#### 컴포넌트 렌더링 위치
+
+```
+Server Components (서버 렌더링)
+└── app/page.tsx
+
+Client Components (클라이언트 렌더링)
+├── DndGridContainer ("use client")
+├── DndGridSplit ("use client")
+├── DndGridItem ("use client")
+└── ItemContent ("use client")
+    └── UserComponent (부모가 Client이므로 Client)
+```
+
+### 핵심 교훈
+
+#### 1. Next.js App Router 환경 이해
+
+- 기본값은 **Server Component**
+- 상태, 이벤트, 브라우저 API 사용 시 **"use client" 필수**
+- Client Component 내부의 모든 자식도 자동으로 Client Component
+
+#### 2. Hydration Mismatch 주의
+
+- 서버 렌더링 결과와 클라이언트 상태가 다르면 리마운트 발생
+- 클라이언트 전용 라이브러리(Zustand)는 반드시 "use client" 필요
+- 첫 상호작용에서만 문제가 발생하는 경우 hydration 의심
+
+#### 3. DnD 라이브러리 설계 시 고려사항
+
+- 모든 인터랙티브 컴포넌트는 Client Component로 설계
+- 사용자에게 명확한 Next.js 사용 가이드 제공
+- Server/Client 경계를 문서화
+
+---
 
 ## 참고 자료
 
@@ -1412,3 +1588,5 @@ React 컴포넌트 상태를 보존하려면:
 -   [React Keys](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key)
 -   [React.cloneElement](https://react.dev/reference/react/cloneElement)
 -   [Zustand](https://github.com/pmndrs/zustand)
+-   [Next.js Server and Client Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+-   [Next.js "use client" Directive](https://nextjs.org/docs/app/building-your-application/rendering/client-components)

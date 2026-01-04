@@ -11,13 +11,7 @@ function AA() {
 
     return <div onClick={() => aa((v) => v + 1)}>{a}</div>;
 }
-/**
- * 
- * TODO
- * 1. 최신 컴파일러 적용
- * 2. mcp
-    
- */
+
 export default function DndGrid() {
     return (
         <DndGridContainer width={1000} height={1000}>
