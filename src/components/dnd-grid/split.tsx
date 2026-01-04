@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';

@@ -1,3 +1,5 @@
+'use client';
+
 import { getQuadrantShadow } from '../../actions/dnd-grid/util';
 
 import { useTreeStore } from '../../actions/dnd-grid/store';

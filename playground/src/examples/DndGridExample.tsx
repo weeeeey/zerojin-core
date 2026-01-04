@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import {
     DndGridContainer,
@@ -13,25 +11,31 @@ function AA() {
 
     return <div onClick={() => aa((v) => v + 1)}>{a}</div>;
 }
-
+/**
+ * 
+ * TODO
+ * 1. 최신 컴파일러 적용
+ * 2. mcp
+    
+ */
 export default function DndGrid() {
     return (
         <DndGridContainer width={1000} height={1000}>
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
-                        <DndGridItemContent id={1212}>
+                        <DndGridItemContent>
                             <AA />
                         </DndGridItemContent>
                     </DndGridItem>
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
-                            <DndGridItemContent id={12121}>
+                            <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
                         </DndGridItem>
                         <DndGridItem>
-                            <DndGridItemContent id={121211}>
+                            <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
                         </DndGridItem>
@@ -41,18 +45,18 @@ export default function DndGrid() {
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridSplit direction="vertical" ratio={0.6}>
                         <DndGridItem>
-                            <DndGridItemContent id={121211}>
+                            <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
                         </DndGridItem>
                         <DndGridItem>
-                            <DndGridItemContent id={1212112}>
+                            <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
                         </DndGridItem>
                     </DndGridSplit>
                     <DndGridItem>
-                        <DndGridItemContent id={121}>
+                        <DndGridItemContent>
                             <AA />
                         </DndGridItemContent>
                     </DndGridItem>

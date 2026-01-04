@@ -1,3 +1,5 @@
+'use client';
+
 import { useTreeStore } from '../../actions/dnd-grid/store';
 import { getQuadrantPosition } from '../../actions/dnd-grid/util';
 

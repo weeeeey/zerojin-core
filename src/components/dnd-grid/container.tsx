@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { parseChildren, collectAllItems } from '../../actions/dnd-grid/util';
 
