@@ -2,15 +2,12 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/index.ts'],
-  format: ['esm'],
+  format: ['cjs'],
   dts: true,
   sourcemap: true,
   clean: true,
-  external: ['@modelcontextprotocol/sdk'],
   outDir: 'dist',
   target: 'node18',
-  shims: true,
-  banner: {
-    js: '#!/usr/bin/env node',
-  },
+  shims: false,
+  noExternal: [/.*/],
 });

@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { DndGridMCPServer } from './server.js';
 
 /**

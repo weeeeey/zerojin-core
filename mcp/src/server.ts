@@ -26,6 +26,8 @@ import {
   InteractiveBuilderInputSchema,
 } from './tools/interactive-builder.js';
 
+import { zodToJsonSchema } from 'zod-to-json-schema';
+
 /**
  * DndGrid MCP Server
  * Provides tools and resources for generating and analyzing DndGrid layouts
@@ -53,32 +55,33 @@ export class DndGridMCPServer {
   private setupHandlers(): void {
     // List available tools
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
+      console.error('ListToolsRequest received');
       return {
         tools: [
           {
             name: 'validate-layout',
             description: 'Validate DndGrid layout structure and constraints',
-            inputSchema: ValidateLayoutInputSchema.shape,
+            inputSchema: zodToJsonSchema(ValidateLayoutInputSchema) as any,
           },
           {
             name: 'analyze-layout',
             description: 'Analyze existing DndGrid code and suggest improvements',
-            inputSchema: AnalyzeLayoutInputSchema.shape,
+            inputSchema: zodToJsonSchema(AnalyzeLayoutInputSchema) as any,
           },
           {
             name: 'apply-template',
             description: 'Apply a pre-defined layout template',
-            inputSchema: ApplyTemplateInputSchema.shape,
+            inputSchema: zodToJsonSchema(ApplyTemplateInputSchema) as any,
           },
           {
             name: 'generate-layout',
             description: 'Generate DndGrid layout code from natural language requirements',
-            inputSchema: GenerateLayoutInputSchema.shape,
+            inputSchema: zodToJsonSchema(GenerateLayoutInputSchema) as any,
           },
           {
             name: 'interactive-builder',
             description: 'Build layout interactively through guided steps',
-            inputSchema: InteractiveBuilderInputSchema.shape,
+            inputSchema: zodToJsonSchema(InteractiveBuilderInputSchema) as any,
           },
         ],
       };
@@ -87,6 +90,7 @@ export class DndGridMCPServer {
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
+      console.error(`CallToolRequest received: ${name}`);
 
       try {
         switch (name) {
