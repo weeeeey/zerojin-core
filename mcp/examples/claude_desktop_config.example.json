@@ -1,0 +1,12 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/config.json",
+  "mcpServers": {
+    "dndgrid": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/zerojin-core/mcp/dist/index.js"
+      ],
+      "env": {}
+    }
+  }
+}
