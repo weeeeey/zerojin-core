@@ -10,4 +10,7 @@ export default defineConfig({
   target: 'node18',
   shims: false,
   noExternal: [/.*/],
+  banner: {
+    js: '#!/usr/bin/env node',
+  },
 });

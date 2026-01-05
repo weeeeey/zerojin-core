@@ -26,7 +26,6 @@ export type DndSplitDirection = 'horizontality' | 'verticality';
  *
  * -item은 자식을 가질 수 없다.
  * -모든 리프 노드는 item 이어야 한다.
- * -item은 relative한 속성을 가진 컴포넌트이다.
  * -item은 컴포넌트의 위치를 가르키는 top과 left가 존재한다. 
  * -item의 폭과 높이 값은 root인 
  * 

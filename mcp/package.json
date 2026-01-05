@@ -1,12 +1,12 @@
 {
-  "name": "@zerojin/mcp-dndgrid",
-  "version": "0.1.0",
+  "name": "mcp-dndgrid",
+  "version": "0.1.1",
   "description": "MCP server for DndGrid layout generation and analysis",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "dndgrid-mcp": "./dist/index.js"
+    "mcp-dndgrid": "dist/index.cjs"
   },
   "scripts": {
     "build": "tsup",

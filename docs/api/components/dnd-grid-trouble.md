@@ -1,0 +1,588 @@
+## 상태 보존 전략
+
+### 문제: DnD 후 children 상태 초기화
+
+```tsx
+function AA() {
+    const [count, setCount] = useState(0);
+    return <div onClick={() => setCount((v) => v + 1)}>{count}</div>;
+}
+
+// [문제 상황
+// DnD 전: count = 3
+// DnD 후: count = 0 ← 리마운트로 인한 초기화
+```
+
+### 시도 1: cloneElement (실패)
+
+**가설:** `React.createElement`가 매번 새 엘리먼트를 생성하여 리마운트
+
+**해결책:** 원본 엘리먼트를 캐시하고 `cloneElement` 사용
+
+```typescript
+// parseChildren에서 원본 저장
+saveElementToCache(nodeId, node);
+
+// buildReactTreeFromNode에서 cloneElement
+const cachedElement = getElementFromCache(item.id);
+return React.cloneElement(cachedElement, {
+    id: item.id,
+    top: item.top,
+    // ... layout props만 업데이트
+});
+```
+
+**결과:** ❌ 여전히 초기화됨
+
+**이유:** React Reconciliation은 **트리 위치(depth)**도 비교
+
+```tsx
+// Before
+<Split depth=1>
+  <Item depth=2 key=2><AA /></Item>  ← depth 2
+</Split>
+
+// After (새 Split 생성)
+<Split depth=1>
+  <Split depth=2>  ← 새로 생성
+    <Item depth=3 key=2><AA /></Item>  ← depth 3 (변경!)
+  </Split>
+</Split>
+
+// React 판단: depth가 다름 → 다른 컴포넌트 → 리마운트
+```
+
+### 시도 2: Flat 렌더링 (성공) ✅
+
+**핵심 아이디어:** 모든 Item을 **같은 depth**에 렌더링
+
+```tsx
+// Flat 구조
+<DndGridContainer>
+  <DndGridItem id=2 key=2 top={0} left={0}><AA /></DndGridItem>
+  <DndGridItem id=3 key=3 top={0} left={400} />
+  <DndGridItem id=5 key=5 top={300} left={0} />
+</DndGridContainer>
+```
+
+**React Reconciliation 체크:**
+
+1. ✅ 타입: `DndGridItem` (동일)
+2. ✅ Key: `id=2` (동일)
+3. ✅ **Depth: 1 (항상 동일!)**
+
+**결과:** React가 같은 컴포넌트로 인식 → 재사용 → **상태 유지**
+
+### 구현: collectAllItems + cloneElement
+
+```typescript
+// 1. Tree에서 모든 Item 추출 (flat array)
+const items = collectAllItems(tree.root);
+
+// 2. 각 Item을 cloneElement로 렌더링
+const renderedItems = items.map((item) => {
+    const cachedElement = getElementFromCache(item.id);
+    const cachedChildren = getChildrenFromCache(item.id);
+
+    return React.cloneElement(cachedElement, {
+        key: item.id,
+        id: item.id,
+        top: item.top,
+        left: item.left,
+        width: item.width,
+        height: item.height,
+        children: cachedChildren, // 원본 children 참조 유지
+    });
+});
+
+// 3. Flat 배열로 렌더링
+setEnhancedChildren(renderedItems);
+```
+
+### 캐싱 전략
+
+```typescript
+// Store
+interface TreeStore {
+    childrenCache: Map<number, React.ReactNode>;
+    elementsCache: Map<number, React.ReactElement>;
+
+    saveChildrenToCache(id: number, children: React.ReactNode): void;
+    saveElementToCache(id: number, element: React.ReactElement): void;
+}
+
+// parseChildren에서 캐싱
+saveElementToCache(nodeId, node); // 원본 <DndGridItem> 엘리먼트
+saveChildrenToCache(nodeId, props.children); // 원본 <AA /> children
+
+// rebuildTree에서 사용
+const cachedElement = getElementFromCache(item.id); // 참조 유지
+const cachedChildren = getChildrenFromCache(item.id); // 참조 유지
+```
+
+**왜 두 개를 캐싱하는가?**
+
+1. **elementsCache**: `React.cloneElement`를 위한 원본 엘리먼트
+
+    - 동일한 React 엘리먼트 참조 유지
+    - React의 fiber reconciliation에서 재사용 가능
+
+2. **childrenCache**: 사용자 컴포넌트 참조 유지
+    - `<AA />` 같은 실제 children
+    - props 변경 없이 동일 참조 유지
+
+### 결과
+
+```tsx
+// DnD 전
+<AA /> → count = 3
+
+// DnD 실행 (Tree 재구조화)
+restructureByDrop() → Tree 변경 → rebuildTree()
+
+// DnD 후
+<AA /> → count = 3  ✅ 상태 유지!
+```
+
+---
+
+
+
+
+# Trouble shooting
+
+## 문제 상황
+
+DnD Grid 컴포넌트에서 드래그 앤 드롭 후 **children 컴포넌트의 상태가 초기화**되는 문제가 발생했습니다.
+
+```tsx
+function AA() {
+    const [count, setCount] = useState(0);
+    return <div onClick={() => setCount((v) => v + 1)}>{count}</div>;
+}
+
+// DndGrid 사용
+<DndGridContainer>
+    <DndGridItem>
+        <AA /> {/* DnD 후 count가 0으로 리셋됨 */}
+    </DndGridItem>
+</DndGridContainer>;
+```
+
+**증상:**
+
+-   DnD 전: `<AA />` 컴포넌트를 클릭하여 count를 3까지 증가
+-   DnD 실행: Item을 다른 위치로 드래그
+-   DnD 후: count가 0으로 초기화 (상태 손실)
+
+## 원인 분석
+
+### 1차 분석: React.createElement vs cloneElement
+
+처음에는 `buildReactTreeFromNode` 함수가 매번 `React.createElement`로 새로운 엘리먼트를 생성하는 것이 원인으로 추정했습니다.
+
+```typescript:src/actions/dnd-grid/util.ts
+// ❌ 문제가 되는 코드
+export function buildReactTreeFromNode(treeNode: ChildNode) {
+    if (treeNode.type === 'item') {
+        return React.createElement(DndGridItem, {  // 매번 새 엘리먼트 생성
+            id: treeNode.id,
+            children: cachedChildren,
+        });
+    }
+}
+```
+
+**해결 시도 1: 원본 엘리먼트 캐싱 + cloneElement**
+
+```typescript
+// store에 elementsCache 추가
+elementsCache: Map<number, React.ReactElement>;
+
+// parseChildren에서 원본 저장
+saveElementToCache(nodeId, node);
+
+// buildReactTreeFromNode에서 cloneElement 사용
+const cachedElement = getElementFromCache(item.id);
+return React.cloneElement(cachedElement, {
+    id: item.id,
+    top: item.top,
+    // ... layout props만 업데이트
+});
+```
+
+**결과:** ❌ 여전히 초기화됨
+
+### 2차 분석: React Reconciliation과 트리 구조
+
+문제의 진짜 원인은 **React의 reconciliation 알고리즘**이었습니다.
+
+#### DnD 시 트리 구조 변경
+
+```tsx
+// 초기 구조
+<DndGridSplit id=1>
+  <DndGridItem id=2 key=2>  ← depth: 2
+    <AA />
+  </DndGridItem>
+  <DndGridItem id=3 key=3 />
+</DndGridSplit>
+
+// DnD 후 - 새로운 Split(id=4) 생성
+<DndGridSplit id=1>
+  <DndGridSplit id=4>  ← 새 Split 추가!
+    <DndGridItem id=2 key=2>  ← depth: 3 (변경!)
+      <AA />
+    </DndGridItem>
+    <DndGridItem id=3 key=3 />
+  </DndGridSplit>
+  <DndGridItem id=5 key=5 />
+</DndGridSplit>
+```
+
+#### React Reconciliation 규칙
+
+React는 다음 규칙으로 컴포넌트를 재사용할지 결정합니다:
+
+1. **같은 타입의 엘리먼트**인가?
+2. **같은 key**를 가지고 있는가?
+3. ⚠️ **같은 트리 위치(depth)**에 있는가?
+
+우리의 경우:
+
+-   ✅ 타입: `DndGridItem` (동일)
+-   ✅ Key: `id=2` (동일)
+-   ❌ **트리 위치: depth 2 → 3 (변경!)**
+
+**React의 판단:** 다른 위치에 있는 새로운 컴포넌트 → **언마운트 후 리마운트**
+
+#### 핵심 문제점
+
+```typescript
+// Item의 ID는 변경되지 않음 (id=2 유지)
+// elementsCache도 정상 작동 (cloneElement 성공)
+// children 참조도 보존됨
+
+// 하지만...
+// 부모 Split이 바뀌면서 트리 구조가 변경됨
+// React는 트리 위치를 보고 "다른 컴포넌트"로 판단
+// → 리마운트 → 상태 초기화
+```
+
+## 해결 과정
+
+### 접근 1: 원본 엘리먼트 참조 보존 (실패)
+
+원본 React 엘리먼트의 참조를 캐시하고 `cloneElement`로 복제하는 방식을 시도했으나, 트리 구조 변경 문제를 해결하지 못했습니다.
+
+### 접근 2: Flat 렌더링 구조 (성공) ✅
+
+**핵심 아이디어:** Split을 렌더링하지 않고, 모든 Item을 Container의 직계 자식으로 flat하게 렌더링
+
+```tsx
+// Before: 트리 구조 렌더링
+<DndGridContainer>
+  <DndGridSplit>
+    <DndGridSplit>
+      <DndGridItem id=2><AA /></DndGridItem>
+    </DndGridSplit>
+  </DndGridSplit>
+</DndGridContainer>
+
+// After: Flat 렌더링
+<DndGridContainer>
+  <DndGridItem id=2><AA /></DndGridItem>  ← 항상 depth 1 유지
+  <DndGridItem id=3 />
+  <DndGridItem id=5 />
+</DndGridContainer>
+```
+
+**왜 작동하는가?**
+
+-   모든 Item이 **항상 같은 depth (Container의 직계 자식)**
+-   DnD 후에도 트리 위치 변경 없음
+-   React가 같은 컴포넌트로 인식 → 재사용 → **상태 유지**
+
+## 최종 해결책
+
+### 1. collectAllItems 유틸리티 추가
+
+Tree를 순회하여 모든 Item 노드만 추출하는 함수를 작성했습니다.
+
+```typescript:src/actions/dnd-grid/util.ts
+/**
+ * Tree를 순회하여 모든 Item 노드를 flat array로 수집
+ * Split은 무시하고 Item만 추출
+ */
+export function collectAllItems(treeNode: ChildNode): ChildNode[] {
+    const items: ChildNode[] = [];
+
+    const traverse = (node: ChildNode) => {
+        if (node.type === 'item') {
+            items.push(node);
+        } else if (node.type === 'split') {
+            // Split은 렌더링하지 않고 자식만 탐색
+            traverse(node.primaryChild);
+            traverse(node.secondaryChild);
+        }
+    };
+
+    traverse(treeNode);
+    return items;
+}
+```
+
+### 2. Container 렌더링 로직 변경
+
+DnD 후 재빌드 시 모든 Item을 flat하게 렌더링하도록 수정했습니다.
+
+```typescript:src/components/dnd-grid/container.tsx
+const rebuildTree = useCallback(() => {
+    const tree = useTreeStore.getState().tree;
+
+    if (!tree) {
+        // 초기 빌드 - 기존 로직 유지 (트리 구조로 렌더링)
+        const componentTree = parseChildren(children, {
+            DndGridSplit,
+            DndGridItem,
+        });
+        const newTree = buildTree(componentTree, width, height);
+        const injected = injectLayoutToChildren(children, newTree.root, {
+            DndGridSplit,
+            DndGridItem,
+        });
+        setEnhancedChildren(injected);
+    } else {
+        // DnD 후 - Flat 렌더링
+        const items = collectAllItems(tree.root);
+        const getElementFromCache = useTreeStore.getState().getElementFromCache;
+        const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+
+        const renderedItems = items.map((item) => {
+            const cachedElement = getElementFromCache(item.id);
+            const cachedChildren = getChildrenFromCache(item.id);
+
+            // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
+            if (cachedElement) {
+                return React.cloneElement(cachedElement, {
+                    key: item.id,
+                    id: item.id,
+                    top: item.top,
+                    left: item.left,
+                    width: item.width,
+                    height: item.height,
+                    children: cachedChildren ?? item.children,
+                });
+            }
+
+            // fallback: createElement
+            return React.createElement(DndGridItem, {
+                key: item.id,
+                id: item.id,
+                top: item.top,
+                left: item.left,
+                width: item.width,
+                height: item.height,
+                children: cachedChildren ?? item.children,
+            });
+        });
+
+        setEnhancedChildren(renderedItems);
+    }
+}, [children, width, height, buildTree]);
+```
+
+### 3. 핵심 변경점
+
+**Before:**
+
+```typescript
+// buildReactTreeFromNode로 Split과 Item을 중첩된 트리 구조로 렌더링
+const updated = buildReactTreeFromNode(tree.root, {
+    DndGridSplit,
+    DndGridItem,
+});
+```
+
+**After:**
+
+```typescript
+// collectAllItems로 Item만 추출하여 flat하게 렌더링
+const items = collectAllItems(tree.root);
+const renderedItems = items.map(item => /* cloneElement or createElement */);
+```
+
+## 결과
+
+### ✅ 문제 해결
+
+-   **상태 보존:** DnD 후에도 `<AA />` 컴포넌트의 count 상태 유지
+-   **React.memo 작동:** children 컴포넌트가 React.memo로 감싸져 있어도 정상 작동
+-   **참조 유지:** 원본 React 엘리먼트 참조와 children 참조 모두 보존
+
+### 렌더링 구조 비교
+
+```tsx
+// Before (문제 있음)
+<DndGridContainer>
+  <DndGridSplit depth=1>
+    <DndGridSplit depth=2>  ← DnD 후 추가됨
+      <DndGridItem depth=3><AA /></DndGridItem>  ← depth 변경으로 리마운트
+    </DndGridSplit>
+  </DndGridSplit>
+</DndGridContainer>
+
+// After (해결)
+<DndGridContainer>
+  <DndGridItem depth=1><AA /></DndGridItem>  ← 항상 depth 1 유지
+  <DndGridItem depth=1 />
+  <DndGridItem depth=1 />
+</DndGridContainer>
+```
+
+### 레이아웃은 어떻게?
+
+Split은 렌더링되지 않지만, Tree 구조는 여전히 유지됩니다:
+
+-   Tree에서 각 Item의 `top`, `left`, `width`, `height` 계산
+-   각 Item을 `position: absolute`로 배치
+-   시각적으로는 동일한 레이아웃 유지
+
+## 핵심 교훈
+
+### 1. React Reconciliation 이해의 중요성
+
+React는 다음을 모두 확인하여 컴포넌트 재사용 여부를 결정합니다:
+
+-   컴포넌트 타입
+-   key 값
+-   **트리 위치 (depth)**
+
+엘리먼트 참조나 children 참조를 보존하는 것만으로는 부족하며, **트리 구조 자체가 유지**되어야 합니다.
+
+### 2. 논리적 구조 vs 렌더링 구조 분리
+
+-   **논리적 구조:** Tree (Split과 Item의 계층 구조)
+-   **렌더링 구조:** Flat (모든 Item을 같은 depth)
+
+둘을 분리하여 논리적 구조로 레이아웃을 계산하되, 렌더링은 flat하게 수행함으로써 상태 보존과 올바른 레이아웃을 동시에 달성했습니다.
+
+### 3. 상태 보존 전략
+
+React 컴포넌트 상태를 보존하려면:
+
+1. **key를 일관되게 유지**
+2. **트리 위치를 변경하지 않음**
+3. 엘리먼트 참조 보존 (cloneElement)
+4. children 참조 보존 (캐싱)
+
+단순히 참조만 보존하는 것이 아니라, React가 인식하는 **트리 구조를 일관되게 유지**하는 것이 핵심입니다.
+
+---
+
+## Next.js App Router 환경에서의 초기화 문제
+
+### 문제 상황 (Next.js App Router)
+
+Next.js App Router 환경에서 **첫 번째 DnD 실행 시** Item Content 컴포넌트 내부의 사용자 정의 컴포넌트 상태가 초기화되는 문제가 발생했습니다.
+
+```tsx
+// app/page.tsx
+function UserComponent() {
+    const [count, setCount] = useState(0);
+    return <div onClick={() => setCount(v => v + 1)}>{count}</div>;
+}
+
+export default function Page() {
+    return (
+        <DndGridContainer width={800} height={600}>
+            <DndGridItem>
+                <UserComponent /> {/* 첫 DnD 후 count가 0으로 리셋 */}
+            </DndGridItem>
+        </DndGridContainer>
+    );
+}
+```
+
+**증상:**
+- 첫 번째 DnD 전: `<UserComponent />`를 클릭하여 count를 5까지 증가
+- 첫 번째 DnD 실행: Item을 다른 위치로 드래그
+- DnD 후: count가 0으로 초기화 (이후 DnD에서는 정상 작동)
+
+### 원인 분석
+
+Next.js App Router는 기본적으로 모든 컴포넌트를 **Server Component**로 취급합니다. DndGrid는 다음과 같은 클라이언트 측 기능을 사용합니다:
+
+1. **이벤트 핸들러** (`onMouseDown`, `onMouseMove`, `onMouseUp`)
+2. **React Hooks** (`useState`, `useEffect`, `useCallback`)
+3. **Zustand Store** (클라이언트 전역 상태)
+4. **브라우저 API** (`MouseEvent`, DOM 조작)
+
+#### Hydration Mismatch 발생
+
+```
+1. 서버에서 Server Component로 렌더링
+   ↓
+2. 클라이언트로 HTML 전송
+   ↓
+3. 클라이언트에서 React hydration 시도
+   ↓
+4. DnD 이벤트 발생 → Zustand store 업데이트
+   ↓
+5. 상태 불일치 감지 (서버 렌더링 결과 ≠ 클라이언트 상태)
+   ↓
+6. React가 안전을 위해 컴포넌트 리마운트
+   ↓
+7. 사용자 컴포넌트 상태 초기화 발생
+```
+
+#### 핵심 문제점
+
+- **Server Component**는 서버에서 한 번 렌더링되고, 클라이언트에서 hydrate됨
+- Zustand store는 **클라이언트 전용** 상태 관리 라이브러리
+- 첫 DnD 시 서버 렌더링 결과와 클라이언트 상태 간 불일치 발생
+- React가 hydration mismatch를 감지하고 컴포넌트를 재마운트
+- 이후 DnD부터는 이미 클라이언트 상태로 완전히 전환되어 정상 작동
+
+### 해결 방법
+
+모든 DndGrid 관련 컴포넌트에 `"use client"` 지시문을 추가하여 **Client Component**로 명시합니다.
+
+#### 수정한 컴포넌트
+
+```typescript
+// src/components/dnd-grid/container.tsx
+"use client";
+
+export function DndGridContainer({ children, width, height }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/split.tsx
+"use client";
+
+export function DndGridSplit({ children, direction, ratio }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/item.tsx
+"use client";
+
+export function DndGridItem({ children, id, top, left, width, height }: Props) {
+    // ... 기존 코드
+}
+```
+
+```typescript
+// src/components/dnd-grid/item-content.tsx
+"use client";
+
+export function ItemContent({ id, children }: Props) {
+    // ... 기존 코드
+}
+```
+---
