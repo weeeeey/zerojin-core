@@ -57,7 +57,7 @@ ${jsx}
 
     // DndGrid components import
     imports.push(
-      `import { DndGridContainer, DndGridSplit, DndGridItem } from 'zerojin/components';`
+      `import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent } from 'zerojin/components';`
     );
 
     return imports.join('\n');
@@ -82,12 +82,15 @@ ${jsx}
   private generateItemJSX(node: LayoutItem, indent: number): string {
     const spaces = ' '.repeat(indent);
     const innerSpaces = ' '.repeat(indent + 2);
+    const contentSpaces = ' '.repeat(indent + 4);
     const componentName = this.options.componentPrefix
       ? `${this.options.componentPrefix}${node.component}`
       : node.component;
 
     return `${spaces}<DndGridItem>
-${innerSpaces}<${componentName} />
+${innerSpaces}<DndGridItemContent>
+${contentSpaces}<${componentName} />
+${innerSpaces}</DndGridItemContent>
 ${spaces}</DndGridItem>`;
   }
 
