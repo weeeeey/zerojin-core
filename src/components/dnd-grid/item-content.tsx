@@ -3,9 +3,15 @@
 import { memo } from 'react';
 
 const DndGridItemContent = memo(
-    ({ children }: { children: React.ReactNode }) => {
+    ({
+        children,
+        className,
+    }: {
+        children: React.ReactNode;
+        className?: string;
+    }) => {
         // console.log('ItemContent rendered, id:', id);
-        return <div>{children}</div>;
+        return <div className={className}>{children}</div>;
     }
 );
 

@@ -7,5 +7,6 @@ export {
     DndGridSplit,
     DndGridItem,
     DndGridContainer,
+    ItemDrag,
     DndGridItemContent,
 } from './dnd-grid';

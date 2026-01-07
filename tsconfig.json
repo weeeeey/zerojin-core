@@ -20,6 +20,6 @@
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
+  "include": ["src", "lib/util.ts"],
   "exclude": ["node_modules", "dist"]
 }

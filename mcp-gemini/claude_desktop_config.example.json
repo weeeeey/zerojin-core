@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "dnd-grid-gemini": {
+      "command": "node",
+      "args": [
+        "/Users/zero/Desktop/zerojin-core/mcp-gemini/dist/index.js"
+      ]
+    }
+  }
+}

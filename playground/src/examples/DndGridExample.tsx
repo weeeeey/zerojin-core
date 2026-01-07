@@ -4,6 +4,7 @@ import {
     DndGridItem,
     DndGridSplit,
     DndGridItemContent,
+    ItemDrag,
 } from 'zerojin/components';
 
 function AA() {
@@ -18,17 +19,20 @@ export default function DndGrid() {
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
+                        <ItemDrag />
                         <DndGridItemContent>
                             <AA />
                         </DndGridItemContent>
                     </DndGridItem>
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
+                            <ItemDrag />
                             <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
                         </DndGridItem>
                         <DndGridItem>
+                            <ItemDrag />
                             <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>

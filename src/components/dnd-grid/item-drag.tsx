@@ -3,7 +3,13 @@
 import { useTreeStore } from '../../actions/dnd-grid/store';
 import { getQuadrantPosition } from '../../actions/dnd-grid/util';
 
-function ItemDrag({ id }: { id: number }) {
+export interface ItemDragProps {
+    id?: number;
+    children?: React.ReactNode;
+    className?: string;
+}
+
+export function ItemDrag({ id, children, className }: ItemDragProps) {
     const startDrag = useTreeStore((state) => state.startDrag);
     const endDrag = useTreeStore((state) => state.endDrag);
 
@@ -70,7 +76,9 @@ function ItemDrag({ id }: { id: number }) {
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
     };
-    return <div onMouseDown={handleMouseDown}>ItemDrag {id}</div>;
+    return (
+        <div className={className} onMouseDown={handleMouseDown}>
+            {children}
+        </div>
+    );
 }
-
-export default ItemDrag;
