@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from '../../../lib/util';
 import { useTreeStore } from '../../actions/dnd-grid/store';
 import { getQuadrantPosition } from '../../actions/dnd-grid/util';
 
@@ -77,7 +78,10 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
         document.addEventListener('mouseup', handleMouseUp);
     };
     return (
-        <div className={className} onMouseDown={handleMouseDown}>
+        <div
+            className={cn('cursor-move', className)}
+            onMouseDown={handleMouseDown}
+        >
             {children}
         </div>
     );

@@ -84,9 +84,7 @@ export function DndGridItem({
             onMouseLeave={handleMouseLeave}
             className={cn(
                 'absolute border border-black box-border overflow-hidden',
-                isDragging
-                    ? 'bg-[#d0d0d0] cursor-grabbing opacity-50'
-                    : 'cursor-grab',
+                isDragging ? 'bg-[#d0d0d0]  opacity-50' : '',
                 className
             )}
             style={{
