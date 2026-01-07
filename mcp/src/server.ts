@@ -70,12 +70,12 @@ export class DndGridMCPServer {
           },
           {
             name: 'apply-template',
-            description: 'Apply a pre-defined layout template',
+            description: 'Apply a pre-defined layout template. width/height must be pixel numbers only (e.g., 1200, 800) - CSS units like "100vw" are NOT supported',
             inputSchema: zodToJsonSchema(ApplyTemplateInputSchema) as any,
           },
           {
             name: 'generate-layout',
-            description: 'Generate DndGrid layout code from natural language requirements',
+            description: 'Generate DndGrid layout code from natural language requirements. containerWidth/containerHeight must be pixel numbers only (e.g., 1200, 800) - CSS units like "100vw" are NOT supported',
             inputSchema: zodToJsonSchema(GenerateLayoutInputSchema) as any,
           },
           {
@@ -205,6 +205,8 @@ DndGrid is a tree-based drag-and-drop grid system for React applications.
 ### DndGridContainer
 - Root component
 - Props: \`width\`, \`height\`, \`children\`
+- **IMPORTANT:** \`width\` and \`height\` must be numbers in pixels (e.g., 1200, 800)
+- Do NOT use CSS units like "100vw" or "100vh" - only pixel numbers are supported
 - Manages global state
 
 ### DndGridSplit
@@ -246,6 +248,15 @@ DndGrid is a tree-based drag-and-drop grid system for React applications.
    */
   private getBestPracticesDoc(): string {
     return `# DndGrid Best Practices
+
+## Container Dimensions
+
+### CRITICAL: Use Pixel Numbers Only
+- **width** and **height** props MUST be numbers in pixels (e.g., 1200, 800)
+- ❌ Do NOT use CSS units like "100vw", "100vh", "100%", "calc(...)", etc.
+- ✅ Use only positive integers representing pixels
+- Example: \`<DndGridContainer width={1200} height={800}>\`
+- The internal layout calculation logic requires numeric pixel values
 
 ## Performance
 

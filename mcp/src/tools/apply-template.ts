@@ -13,8 +13,20 @@ export const ApplyTemplateInputSchema = z.object({
   components: z
     .record(z.string())
     .describe('Mapping of template slots to component names'),
-  width: z.number().optional().default(1200).describe('Container width'),
-  height: z.number().optional().default(800).describe('Container height'),
+  width: z
+    .number()
+    .positive()
+    .max(10000)
+    .optional()
+    .default(1200)
+    .describe('Container width in pixels (number only, e.g., 1200). Do NOT use CSS units like "100vw"'),
+  height: z
+    .number()
+    .positive()
+    .max(10000)
+    .optional()
+    .default(800)
+    .describe('Container height in pixels (number only, e.g., 800). Do NOT use CSS units like "100vh"'),
   framework: z
     .enum(['react', 'nextjs-app', 'nextjs-pages'])
     .optional()

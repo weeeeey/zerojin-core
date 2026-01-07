@@ -15,8 +15,20 @@ export const GenerateLayoutInputSchema = z.object({
       'Natural language description of desired layout (e.g., "3-panel IDE layout with sidebar, editor, and terminal")'
     ),
   components: z.array(z.string()).describe('List of component names to place in the layout'),
-  containerWidth: z.number().optional().default(1200).describe('Container width in pixels'),
-  containerHeight: z.number().optional().default(800).describe('Container height in pixels'),
+  containerWidth: z
+    .number()
+    .positive()
+    .max(10000)
+    .optional()
+    .default(1200)
+    .describe('Container width in pixels (number only, e.g., 1200). Do NOT use CSS units like "100vw"'),
+  containerHeight: z
+    .number()
+    .positive()
+    .max(10000)
+    .optional()
+    .default(800)
+    .describe('Container height in pixels (number only, e.g., 800). Do NOT use CSS units like "100vh"'),
   framework: z
     .enum(['react', 'nextjs-app', 'nextjs-pages'])
     .optional()
