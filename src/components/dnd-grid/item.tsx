@@ -83,7 +83,7 @@ export function DndGridItem({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                'absolute border border-black box-border overflow-hidden',
+                'absolute border border-black box-border overflow-hidden bg-blue-500',
                 isDragging ? 'bg-[#d0d0d0]  opacity-50' : '',
                 className
             )}

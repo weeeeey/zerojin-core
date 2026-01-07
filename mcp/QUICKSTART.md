@@ -4,9 +4,9 @@
 
 ## 사전 요구사항
 
-- Node.js 18+ 설치
-- Claude Desktop 앱 설치
-- Terminal 접근 권한
+-   Node.js 18+ 설치
+-   Claude Desktop 앱 설치
+-   Terminal 접근 권한
 
 ## 1단계: 서버 빌드 (2분)
 
@@ -17,6 +17,7 @@ npm run build
 ```
 
 **예상 출력**:
+
 ```
 Build complete: dist/index.js (10.14 MB)
 ```
@@ -31,18 +32,19 @@ Build complete: dist/index.js (10.14 MB)
 
 ```json
 {
-  "mcpServers": {
-    "dndgrid": {
-      "command": "node",
-      "args": ["/absolute/path/to/zerojin-core/mcp/dist/index.js"]
+    "mcpServers": {
+        "dndgrid": {
+            "command": "node",
+            "args": ["/absolute/path/to/zerojin-core/mcp/dist/index.js"]
+        }
     }
-  }
 }
 ```
 
 **중요**: `/absolute/path/to/zerojin-core`를 실제 프로젝트 경로로 변경하세요!
 
 **경로 찾기**:
+
 ```bash
 # zerojin-core 디렉토리에서
 pwd
@@ -60,6 +62,7 @@ pwd
 새 대화를 열고 다음을 시도하세요:
 
 ### 테스트 1: 템플릿 목록
+
 ```
 사용 가능한 DndGrid 템플릿 보여줘
 ```
@@ -67,6 +70,7 @@ pwd
 **예상 결과**: Claude가 4개 템플릿 나열 (IDE, Dashboard, Three-Column, Split View)
 
 ### 테스트 2: 레이아웃 생성
+
 ```
 FileExplorer, CodeEditor, Terminal 컴포넌트로 3-패널 IDE 레이아웃 만들어줘
 ```
@@ -74,6 +78,7 @@ FileExplorer, CodeEditor, Terminal 컴포넌트로 3-패널 IDE 레이아웃 만
 **예상 결과**: Claude가 완전한 TypeScript/JSX 코드 생성
 
 ### 테스트 3: 문서 접근
+
 ```
 DndGrid 아키텍처 문서 보여줘
 ```
@@ -126,6 +131,7 @@ DndGrid 성능 모범 사례가 뭐야?
 **증상**: Claude가 DndGrid 명령어를 인식하지 못함
 
 **해결**:
+
 1. 설정 파일 경로가 올바른지 확인
 2. `dist/index.js`가 존재하는지 확인 (없으면 다시 빌드)
 3. Claude Desktop 재시작
@@ -136,6 +142,7 @@ DndGrid 성능 모범 사례가 뭐야?
 **증상**: 파일을 찾을 수 없다는 오류
 
 **해결**:
+
 ```bash
 # 절대 경로 확인
 cd /path/to/zerojin-core
@@ -148,6 +155,7 @@ pwd
 **증상**: `npm run build` 실패
 
 **해결**:
+
 ```bash
 # 정리 후 재빌드
 rm -rf node_modules dist
@@ -157,10 +165,10 @@ npm run build
 
 ## 다음 단계
 
-- 고급 예제는 [USAGE_GUIDE.md](./USAGE_GUIDE.md) 참조
-- 완전한 문서는 [README.md](./README.md) 참조
-- 코드 샘플은 [examples/](./examples/) 디렉토리 확인
-- 테스트는 [test-scenarios.md](./examples/test-scenarios.md) 참조
+-   고급 예제는 [USAGE_GUIDE.md](./USAGE_GUIDE.md) 참조
+-   완전한 문서는 [README.md](./README.md) 참조
+-   코드 샘플은 [examples/](./examples/) 디렉토리 확인
+-   테스트는 [test-scenarios.md](./examples/test-scenarios.md) 참조
 
 ## 빠른 레퍼런스
 
@@ -178,6 +186,8 @@ npm run build
 2. **dashboard-2x2** - 대시보드용 2x2 그리드
 3. **three-column** - 왼쪽/가운데/오른쪽 컬럼
 4. **split-view** - 단순 50/50 분할
+
+각 템플릿의 상세 정보 (비율, 슬롯 구성, 비주얼)는 [README.md](./README.md#사용-가능한-템플릿)를 참조하세요.
 
 ### 사용 가능한 Resources
 
@@ -205,11 +215,11 @@ npm run build
 
 ## 성능 팁
 
-- 최상의 성능을 위해 레이아웃을 20개 아이템 이하로 유지
-- 중첩을 4 레벨 이하로 제한
-- 0.2와 0.8 사이의 비율 사용
-- Next.js App Router에는 "use client" 추가
-- 개발 중에는 strict 모드로 검증
+-   레이아웃을 20개 아이템 이하로 유지
+-   중첩을 4 레벨 이하로 제한
+-   Next.js App Router에는 "use client" 추가
+
+상세한 성능 가이드라인과 제약사항은 [README.md](./README.md#성능-가이드라인)를 참조하세요.
 
 ## 도움말
 
