@@ -266,86 +266,86 @@ export function collectAllItems(treeNode: ChildNode): ChildNode[] {
  * @param options - 컴포넌트 타입
  * @returns React 노드
  */
-export function buildReactTreeFromNode(
-    treeNode: ChildNode,
-    options: ParseChildrenOptions
-): React.ReactNode {
-    const { DndGridSplit, DndGridItem } = options;
+// export function buildReactTreeFromNode(
+//     treeNode: ChildNode,
+//     options: ParseChildrenOptions
+// ): React.ReactNode {
+//     const { DndGridSplit, DndGridItem } = options;
 
-    if (!treeNode) return null;
+//     if (!treeNode) return null;
 
-    const getElementFromCache = useTreeStore.getState().getElementFromCache;
-    const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+//     const getElementFromCache = useTreeStore.getState().getElementFromCache;
+//     const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
 
-    // Item 노드인 경우
-    if (treeNode.type === 'item') {
-        const cachedElement = getElementFromCache(treeNode.id);
-        const cachedChildren = getChildrenFromCache(treeNode.id);
+//     // Item 노드인 경우
+//     if (treeNode.type === 'item') {
+//         const cachedElement = getElementFromCache(treeNode.id);
+//         const cachedChildren = getChildrenFromCache(treeNode.id);
 
-        // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
-        if (cachedElement) {
-            return React.cloneElement(cachedElement, {
-                key: treeNode.id,
-                id: treeNode.id,
-                top: treeNode.top,
-                left: treeNode.left,
-                width: treeNode.width,
-                height: treeNode.height,
-                children: cachedChildren ?? treeNode.children,
-            } as any);
-        }
+//         // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
+//         if (cachedElement) {
+//             return React.cloneElement(cachedElement, {
+//                 key: treeNode.id,
+//                 id: treeNode.id,
+//                 top: treeNode.top,
+//                 left: treeNode.left,
+//                 width: treeNode.width,
+//                 height: treeNode.height,
+//                 children: cachedChildren ?? treeNode.children,
+//             } as any);
+//         }
 
-        // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
-        return React.createElement(DndGridItem, {
-            key: treeNode.id,
-            id: treeNode.id,
-            top: treeNode.top,
-            left: treeNode.left,
-            width: treeNode.width,
-            height: treeNode.height,
-            children: cachedChildren ?? treeNode.children,
-        });
-    }
+//         // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
+//         return React.createElement(DndGridItem, {
+//             key: treeNode.id,
+//             id: treeNode.id,
+//             top: treeNode.top,
+//             left: treeNode.left,
+//             width: treeNode.width,
+//             height: treeNode.height,
+//             children: cachedChildren ?? treeNode.children,
+//         });
+//     }
 
-    // Split 노드인 경우
-    if (treeNode.type === 'split') {
-        const primaryChild = buildReactTreeFromNode(
-            treeNode.primaryChild,
-            options
-        );
-        const secondaryChild = buildReactTreeFromNode(
-            treeNode.secondaryChild,
-            options
-        );
+//     // Split 노드인 경우
+//     if (treeNode.type === 'split') {
+//         const primaryChild = buildReactTreeFromNode(
+//             treeNode.primaryChild,
+//             options
+//         );
+//         const secondaryChild = buildReactTreeFromNode(
+//             treeNode.secondaryChild,
+//             options
+//         );
 
-        const cachedElement = getElementFromCache(treeNode.id);
+//         const cachedElement = getElementFromCache(treeNode.id);
 
-        // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
-        if (cachedElement) {
-            return React.cloneElement(
-                cachedElement,
-                {
-                    key: treeNode.id,
-                    id: treeNode.id,
-                    direction: treeNode.direction,
-                    ratio: treeNode.ratio,
-                } as any,
-                [primaryChild, secondaryChild]
-            );
-        }
+//         // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
+//         if (cachedElement) {
+//             return React.cloneElement(
+//                 cachedElement,
+//                 {
+//                     key: treeNode.id,
+//                     id: treeNode.id,
+//                     direction: treeNode.direction,
+//                     ratio: treeNode.ratio,
+//                 } as any,
+//                 [primaryChild, secondaryChild]
+//             );
+//         }
 
-        // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
-        return React.createElement(
-            DndGridSplit,
-            {
-                key: treeNode.id,
-                id: treeNode.id,
-                direction: treeNode.direction,
-                ratio: treeNode.ratio,
-            },
-            [primaryChild, secondaryChild]
-        );
-    }
+//         // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
+//         return React.createElement(
+//             DndGridSplit,
+//             {
+//                 key: treeNode.id,
+//                 id: treeNode.id,
+//                 direction: treeNode.direction,
+//                 ratio: treeNode.ratio,
+//             },
+//             [primaryChild, secondaryChild]
+//         );
+//     }
 
-    return null;
-}
+//     return null;
+// }

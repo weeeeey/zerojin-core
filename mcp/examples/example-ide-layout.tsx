@@ -13,7 +13,7 @@
 
 "use client";
 
-import { DndGridContainer, DndGridSplit, DndGridItem } from 'zerojin/components';
+import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent, ItemDrag } from 'zerojin/components';
 import { FileExplorer } from './components/FileExplorer';
 import { CodeEditor } from './components/CodeEditor';
 import { Terminal } from './components/Terminal';
@@ -23,14 +23,26 @@ export default function IDELayout() {
     <DndGridContainer width={1600} height={900}>
       <DndGridSplit direction="vertical" ratio={0.2}>
         <DndGridItem>
-          <FileExplorer />
+          <ItemDrag>
+            <DndGridItemContent>
+              <FileExplorer />
+            </DndGridItemContent>
+          </ItemDrag>
         </DndGridItem>
         <DndGridSplit direction="horizontal" ratio={0.7}>
           <DndGridItem>
-            <CodeEditor />
+            <ItemDrag>
+              <DndGridItemContent>
+                <CodeEditor />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
           <DndGridItem>
-            <Terminal />
+            <ItemDrag>
+              <DndGridItemContent>
+                <Terminal />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
         </DndGridSplit>
       </DndGridSplit>
@@ -47,6 +59,7 @@ export default function IDELayout() {
  *
  * Best Practices:
  * ✅ "use client" directive for Next.js App Router
+ * ✅ ItemDrag 래퍼 사용 (DndGrid v2.0+ 필수)
  * ✅ Ratios within recommended range (0.2-0.8)
  * ✅ Low item count (< 20)
  * ✅ Shallow nesting (< 4 levels)

@@ -14,7 +14,7 @@
 
 "use client";
 
-import { DndGridContainer, DndGridSplit, DndGridItem } from 'zerojin/components';
+import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent, ItemDrag } from 'zerojin/components';
 import { UserStats } from './components/UserStats';
 import { RevenueChart } from './components/RevenueChart';
 import { ActivityLog } from './components/ActivityLog';
@@ -26,18 +26,34 @@ export default function Dashboard() {
       <DndGridSplit direction="horizontal" ratio={0.5}>
         <DndGridSplit direction="vertical" ratio={0.5}>
           <DndGridItem>
-            <UserStats />
+            <ItemDrag>
+              <DndGridItemContent>
+                <UserStats />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
           <DndGridItem>
-            <RevenueChart />
+            <ItemDrag>
+              <DndGridItemContent>
+                <RevenueChart />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
         </DndGridSplit>
         <DndGridSplit direction="vertical" ratio={0.5}>
           <DndGridItem>
-            <ActivityLog />
+            <ItemDrag>
+              <DndGridItemContent>
+                <ActivityLog />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
           <DndGridItem>
-            <QuickActions />
+            <ItemDrag>
+              <DndGridItemContent>
+                <QuickActions />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
         </DndGridSplit>
       </DndGridSplit>
@@ -53,6 +69,8 @@ export default function Dashboard() {
  * - Estimated Performance: Excellent
  *
  * Best Practices:
+ * ✅ "use client" directive for Next.js App Router
+ * ✅ ItemDrag 래퍼 사용 (DndGrid v2.0+ 필수)
  * ✅ Equal ratios (0.5) for balanced grid
  * ✅ Symmetrical structure
  * ✅ Low complexity

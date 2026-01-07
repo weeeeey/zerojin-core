@@ -253,58 +253,58 @@ export class GridSplit extends BaseNode {
     }
 }
 
-export class GridContainer {
-    readonly type = 'container' as const;
-    private _width: number;
-    private _height: number;
-    private _ratio: 1 = 1;
-    private _top: 0 = 0;
-    private _left: 0 = 0;
-    private _child?: ChildNode;
+// export class GridContainer {
+//     readonly type = 'container' as const;
+//     private _width: number;
+//     private _height: number;
+//     private _ratio: 1 = 1;
+//     private _top: 0 = 0;
+//     private _left: 0 = 0;
+//     private _child?: ChildNode;
 
-    constructor(width: number, height: number) {
-        this._width = width;
-        this._height = height;
-    }
+//     constructor(width: number, height: number) {
+//         this._width = width;
+//         this._height = height;
+//     }
 
-    // Getters
-    get width(): number {
-        return this._width;
-    }
+//     // Getters
+//     get width(): number {
+//         return this._width;
+//     }
 
-    get height(): number {
-        return this._height;
-    }
+//     get height(): number {
+//         return this._height;
+//     }
 
-    get ratio(): 1 {
-        return this._ratio;
-    }
+//     get ratio(): 1 {
+//         return this._ratio;
+//     }
 
-    get top(): 0 {
-        return this._top;
-    }
+//     get top(): 0 {
+//         return this._top;
+//     }
 
-    get left(): 0 {
-        return this._left;
-    }
+//     get left(): 0 {
+//         return this._left;
+//     }
 
-    get child(): ChildNode | undefined {
-        return this._child;
-    }
+//     get child(): ChildNode | undefined {
+//         return this._child;
+//     }
 
-    // Setters
-    set width(value: number) {
-        this._width = value;
-    }
+//     // Setters
+//     set width(value: number) {
+//         this._width = value;
+//     }
 
-    set height(value: number) {
-        this._height = value;
-    }
+//     set height(value: number) {
+//         this._height = value;
+//     }
 
-    set child(value: ChildNode) {
-        this._child = value;
-    }
-}
+//     set child(value: ChildNode) {
+//         this._child = value;
+//     }
+// }
 
 export class Tree {
     private _root: ChildNode;

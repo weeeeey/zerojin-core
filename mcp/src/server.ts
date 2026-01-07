@@ -209,6 +209,25 @@ DndGrid is a tree-based drag-and-drop grid system for React applications.
 - Do NOT use CSS units like "100vw" or "100vh" - only pixel numbers are supported
 - Manages global state
 
+### ItemDrag (필수)
+
+**DndGrid v2.0+ 필수 요구사항**
+
+모든 드래그 가능한 아이템은 ItemDrag로 감싸야 합니다:
+
+\`\`\`tsx
+<DndGridItem>
+  <ItemDrag>
+    <DndGridItemContent>
+      <YourComponent />
+    </DndGridItemContent>
+  </ItemDrag>
+</DndGridItem>
+\`\`\`
+
+- ItemDrag는 드래그 인터랙션을 처리합니다
+- 커스텀 헤더가 필요한 경우 수동으로 children 추가 가능
+
 ### DndGridSplit
 - Divides space into two sections
 - Props: \`direction\` ('horizontal' | 'vertical'), \`ratio\` (0-1), \`children\` (exactly 2)
@@ -257,6 +276,30 @@ DndGrid is a tree-based drag-and-drop grid system for React applications.
 - ✅ Use only positive integers representing pixels
 - Example: \`<DndGridContainer width={1200} height={800}>\`
 - The internal layout calculation logic requires numeric pixel values
+
+## 컴포넌트 구조
+
+### ItemDrag 필수 사용
+
+✅ **올바른 구조**:
+\`\`\`tsx
+<DndGridItem>
+  <ItemDrag>
+    <DndGridItemContent>
+      <Component />
+    </DndGridItemContent>
+  </ItemDrag>
+</DndGridItem>
+\`\`\`
+
+❌ **잘못된 구조** (드래그 작동 안 함):
+\`\`\`tsx
+<DndGridItem>
+  <DndGridItemContent>
+    <Component />
+  </DndGridItemContent>
+</DndGridItem>
+\`\`\`
 
 ## Performance
 

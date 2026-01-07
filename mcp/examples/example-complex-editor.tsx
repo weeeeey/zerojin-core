@@ -15,7 +15,7 @@
 
 "use client";
 
-import { DndGridContainer, DndGridSplit, DndGridItem } from 'zerojin/components';
+import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent, ItemDrag } from 'zerojin/components';
 import { Navigation } from './components/Navigation';
 import { FileTree } from './components/FileTree';
 import { Editor } from './components/Editor';
@@ -30,14 +30,22 @@ export default function ComplexEditorLayout() {
       {/* Top: Navigation */}
       <DndGridSplit direction="horizontal" ratio={0.08}>
         <DndGridItem>
-          <Navigation />
+          <ItemDrag>
+            <DndGridItemContent>
+              <Navigation />
+            </DndGridItemContent>
+          </ItemDrag>
         </DndGridItem>
 
         {/* Main content area */}
         <DndGridSplit direction="vertical" ratio={0.15}>
           {/* Left: File tree */}
           <DndGridItem>
-            <FileTree />
+            <ItemDrag>
+              <DndGridItemContent>
+                <FileTree />
+              </DndGridItemContent>
+            </ItemDrag>
           </DndGridItem>
 
           {/* Center + Right + Bottom */}
@@ -47,27 +55,47 @@ export default function ComplexEditorLayout() {
               {/* Center: Editor + Preview */}
               <DndGridSplit direction="vertical" ratio={0.6}>
                 <DndGridItem>
-                  <Editor />
+                  <ItemDrag>
+                    <DndGridItemContent>
+                      <Editor />
+                    </DndGridItemContent>
+                  </ItemDrag>
                 </DndGridItem>
                 <DndGridItem>
-                  <Preview />
+                  <ItemDrag>
+                    <DndGridItemContent>
+                      <Preview />
+                    </DndGridItemContent>
+                  </ItemDrag>
                 </DndGridItem>
               </DndGridSplit>
 
               {/* Bottom: Console + Terminal */}
               <DndGridSplit direction="vertical" ratio={0.5}>
                 <DndGridItem>
-                  <Console />
+                  <ItemDrag>
+                    <DndGridItemContent>
+                      <Console />
+                    </DndGridItemContent>
+                  </ItemDrag>
                 </DndGridItem>
                 <DndGridItem>
-                  <Terminal />
+                  <ItemDrag>
+                    <DndGridItemContent>
+                      <Terminal />
+                    </DndGridItemContent>
+                  </ItemDrag>
                 </DndGridItem>
               </DndGridSplit>
             </DndGridSplit>
 
             {/* Right: Properties */}
             <DndGridItem>
-              <Properties />
+              <ItemDrag>
+                <DndGridItemContent>
+                  <Properties />
+                </DndGridItemContent>
+              </ItemDrag>
             </DndGridItem>
           </DndGridSplit>
         </DndGridSplit>
@@ -95,6 +123,7 @@ export default function ComplexEditorLayout() {
  *
  * Best Practices Followed:
  * ✅ "use client" directive
+ * ✅ ItemDrag 래퍼 사용 (DndGrid v2.0+ 필수)
  * ✅ Descriptive component names
  * ✅ Logical grouping of related panels
  * ✅ Ratios within usable ranges
