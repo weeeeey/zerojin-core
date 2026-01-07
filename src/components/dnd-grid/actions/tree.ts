@@ -1,15 +1,11 @@
-import { ComponentNode, DropQuadrant, getSplitDirection } from './util';
+import { ComponentNode, DropQuadrant, NodeType, DndSplitDirection, NodeSnapshot } from './types';
+import { getSplitDirection } from './util';
 import React from 'react';
-
-type ITEM = 'item';
-type SPLIT = 'split';
-
-export type NodeType = ITEM | SPLIT;
-export type DndSplitDirection = 'horizontal' | 'vertical';
 
 export type ChildNode = GridItem | GridSplit;
 
 type ParentWithCurrent = { node: ChildNode; parent: GridSplit | null };
+
 
 /**
  * 노드를 복제하여 새로운 객체 참조를 생성합니다.
@@ -491,22 +487,11 @@ export class Tree {
      * 트리의 현재 상태를 스냅샷으로 저장합니다.
      * 나중에 diffTree로 비교할 수 있도록 shallow copy를 만듭니다.
      */
-    createSnapshot(): Map<
-        number,
-        {
-            id: number;
-            width: number;
-            height: number;
-            top: number;
-            left: number;
-            primaryChildId?: number;
-            secondaryChildId?: number;
-        }
-    > {
-        const snapshot = new Map();
+    createSnapshot(): Map<number, NodeSnapshot> {
+        const snapshot = new Map<number, NodeSnapshot>();
 
         const traverse = (node: ChildNode) => {
-            const data: any = {
+            const data: NodeSnapshot = {
                 id: node.id,
                 width: node.width,
                 height: node.height,
@@ -535,7 +520,7 @@ export class Tree {
      * 스냅샷과 현재 트리를 비교하여 변경된 노드만 찾습니다.
      * React reconciliation 알고리즘처럼 동작합니다.
      */
-    diffWithSnapshot(snapshot: Map<number, any>): Set<number> {
+    diffWithSnapshot(snapshot: Map<number, NodeSnapshot>): Set<number> {
         const changedIds = new Set<number>();
 
         const traverse = (node: ChildNode) => {

@@ -1,8 +1,8 @@
 'use client';
 
 import { cn } from '../../../lib/util';
-import { useTreeStore } from '../../actions/dnd-grid/store';
-import { getQuadrantPosition } from '../../actions/dnd-grid/util';
+import { useTreeStore } from './actions/store';
+import { getQuadrantPosition } from './actions/util';
 
 export interface ItemDragProps {
     id?: number;

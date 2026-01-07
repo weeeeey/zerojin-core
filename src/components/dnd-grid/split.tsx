@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { useTreeStore } from '../../actions/dnd-grid/store';
+import { useTreeStore } from './actions/store';
 
 interface DndGridSplitProps {
     children: [React.ReactNode, React.ReactNode];

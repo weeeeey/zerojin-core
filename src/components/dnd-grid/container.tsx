@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { parseChildren, collectAllItems } from '../../actions/dnd-grid/util';
+import { parseChildren, collectAllItems } from './actions/util';
 
 import { DndGridItem, DndGridSplit } from './';
 
-import { useTreeStore } from '../../actions/dnd-grid/store';
+import { useTreeStore } from './actions/store';
 
 export function DndGridContainer({
     width,

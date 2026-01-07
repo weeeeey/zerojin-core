@@ -1,71 +1,72 @@
 {
-  "name": "zerojin",
-  "version": "0.1.6",
-  "description": "A collection of React hooks and components for modern web applications",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+    "name": "zerojin",
+    "version": "0.1.6",
+    "description": "A collection of React hooks and components for modern web applications",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js"
+        },
+        "./hooks": {
+            "types": "./dist/hooks/index.d.ts",
+            "import": "./dist/hooks/index.mjs",
+            "require": "./dist/hooks/index.js"
+        },
+        "./components": {
+            "types": "./dist/components/index.d.ts",
+            "import": "./dist/components/index.mjs",
+            "require": "./dist/components/index.js"
+        }
     },
-    "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "import": "./dist/hooks/index.mjs",
-      "require": "./dist/hooks/index.js"
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "type-check": "tsc --noEmit",
+        "docs:dev": "vitepress dev docs",
+        "docs:build": "vitepress build docs",
+        "docs:preview": "vitepress preview docs",
+        "playground": "vite playground",
+        "playground:build": "vite build playground",
+        "mcp:build": "cd mcp && npm run build"
     },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.mjs",
-      "require": "./dist/components/index.js"
+    "keywords": [
+        "react",
+        "hooks",
+        "components",
+        "typescript",
+        "nextjs"
+    ],
+    "author": "weeey",
+    "license": "MIT",
+    "peerDependencies": {
+        "react": "^18.0.0 || ^19.0.0",
+        "react-dom": "^18.0.0 || ^19.0.0"
+    },
+    "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.18",
+        "@types/node": "^25.0.3",
+        "@types/react": "^19.2.7",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^4.3.4",
+        "postcss": "^8.5.6",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "tailwindcss": "^4.1.18",
+        "tsup": "^8.5.1",
+        "typescript": "^5.9.3",
+        "vite": "^6.0.11",
+        "vitepress": "^1.6.4"
+    },
+    "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.4.0",
+        "zustand": "^5.0.9"
     }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "type-check": "tsc --noEmit",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "playground": "vite playground",
-    "playground:build": "vite build playground"
-  },
-  "keywords": [
-    "react",
-    "hooks",
-    "components",
-    "typescript",
-    "nextjs"
-  ],
-  "author": "weeey",
-  "license": "MIT",
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^25.0.3",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "postcss": "^8.5.6",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwindcss": "^4.1.18",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "vite": "^6.0.11",
-    "vitepress": "^1.6.4"
-  },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^3.4.0",
-    "zustand": "^5.0.9"
-  }
 }

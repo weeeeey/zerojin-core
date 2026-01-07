@@ -1,26 +1,14 @@
 import React from 'react';
-import { ChildNode, DndSplitDirection } from './tree';
+import { ChildNode } from './tree';
 import { useTreeStore } from './store';
+import {
+    ComponentNode,
+    ParseChildrenOptions,
+    DropQuadrant,
+    CalculateQuadrantProps,
+    DndSplitDirection,
+} from './types';
 
-export interface ComponentNode {
-    type: 'split' | 'item';
-    id: number;
-
-    // Split 컴포넌트인 경우
-    direction?: 'horizontal' | 'vertical';
-    ratio?: number;
-    primary?: ComponentNode;
-    secondary?: ComponentNode;
-
-    // Item 컴포넌트인 경우
-    children?: React.ReactNode;
-}
-
-interface ParseChildrenOptions {
-    DndGridSplit: React.ComponentType<any>;
-    DndGridItem: React.ComponentType<any>;
-    ItemDrag?: React.ComponentType<any>;
-}
 
 /**
  * React children을 재귀적으로 파싱하여 ComponentNode 트리 구조로 변환 (이진 트리 ID 체계 사용)
@@ -178,16 +166,7 @@ export function parseChildren(
 //     return reactNode;
 // }
 
-export type DropQuadrant = 'top' | 'left' | 'right' | 'bottom';
 
-export type CalculateQuadrantProps = {
-    startLeft: number;
-    startTop: number;
-    width: number;
-    height: number;
-    mouseX: number;
-    mouseY: number;
-};
 export const getQuadrantPosition = ({
     mouseX,
     mouseY,

@@ -1,9 +1,9 @@
 'use client';
 
 import { cn } from '../../../lib/util';
-import { getQuadrantShadow } from '../../actions/dnd-grid/util';
+import { getQuadrantShadow } from './actions/util';
 
-import { useTreeStore } from '../../actions/dnd-grid/store';
+import { useTreeStore } from './actions/store';
 
 import React, { useMemo } from 'react';
 import { ItemDrag, ItemDragProps } from './item-drag';

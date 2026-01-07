@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Tree, { ChildNode, cloneNode } from './tree';
-import type { ComponentNode } from './util';
-import type { DropQuadrant } from './util';
+import type { ComponentNode, DropQuadrant } from './types';
+
 import React from 'react';
 
 interface DragDropStore {
