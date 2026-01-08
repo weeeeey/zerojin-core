@@ -7,6 +7,11 @@ export default defineConfig({
     lang: 'ko-KR',
 
     themeConfig: {
+        nav: [
+            { text: '가이드', link: '/guide/getting-started' },
+            { text: 'API', link: '/api/components/' },
+        ],
+
         sidebar: [
             {
                 text: '가이드',
@@ -83,5 +88,19 @@ export default defineConfig({
             message: 'MIT 라이선스로 배포됩니다.',
             copyright: 'Copyright © 2025 weeeeey',
         },
+
+        outline: {
+            level: [2, 3],
+            label: '목차',
+        },
+
+        docFooter: {
+            prev: '이전',
+            next: '다음',
+        },
+
+        darkModeSwitchLabel: '다크 모드',
+        sidebarMenuLabel: '메뉴',
+        returnToTopLabel: '맨 위로',
     },
 });
