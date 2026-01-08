@@ -36,6 +36,7 @@ export function DndGridItem({
     const dropQuadrant = useTreeStore((state) =>
         state.hoveredItemId === id ? state.dropQuadrant : null
     );
+    const translate = useTreeStore((state) => state.translates);
 
     const setHoveredItem = useTreeStore((state) => state.setHoveredItem);
 
@@ -83,7 +84,7 @@ export function DndGridItem({
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             className={cn(
-                'absolute border border-black box-border overflow-hidden bg-blue-500',
+                'absolute border border-black box-border ',
                 isDragging ? 'bg-[#d0d0d0]  opacity-50' : '',
                 className
             )}
@@ -93,6 +94,9 @@ export function DndGridItem({
                 top: `${top}px`,
                 left: `${left}px`,
                 boxShadow: isHovered ? getQuadrantShadow(dropQuadrant) : '',
+                transform: isDragging
+                    ? `translate(${translate.x}px, ${translate.y}px)`
+                    : `translate(0px, 0px)`,
             }}
         >
             {injectedChildren}

@@ -4,16 +4,24 @@ import type { ComponentNode, DropQuadrant } from './types';
 
 import React from 'react';
 
+type TranslateProps = {
+    x: number;
+    y: number;
+};
+
 interface DragDropStore {
     draggedItemId: number | null; //- 현재 드래그 중인 아이템
     hoveredItemId: number | null; //- 드롭 타겟 후보 아이템
     dropQuadrant: DropQuadrant | null; //- 드롭될 사분면 (이미 타입은 util.ts:149에 정의됨)
     containerRef: React.RefObject<HTMLDivElement | null> | null; //- Container의 ref
+    translates: TranslateProps;
+
     startDrag: (itemId: number) => void; //- 드래그 시작 시 호출
     endDrag: () => void; //- 마우스 업 시 호출, 드롭 처리 및 상태 초기화
     setHoveredItem: (itemId: number | null) => void; //- 마우스 엔터/리브 시 호출
     setDropQuadrant: (quadrant: DropQuadrant | null) => void; //- 마우스 무브 시 사분면 계산 후 호출
     setContainerRef: (ref: React.RefObject<HTMLDivElement | null>) => void; //- Container ref 설정
+    setTranslates: (translates: TranslateProps) => void; //- Container translate 설정
 }
 
 interface TreeStore extends DragDropStore {
@@ -113,6 +121,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     willRerenderNodes: new Set(),
     childrenCache: new Map(),
     elementsCache: new Map(),
+    translates: { x: 0, y: 0 },
 
     draggedItemId: null,
     hoveredItemId: null,
@@ -177,6 +186,7 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
             draggedItemId: null,
             hoveredItemId: null,
             dropQuadrant: null,
+            translates: { x: 0, y: 0 },
         });
     },
 
@@ -216,32 +226,6 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
         return tree;
     },
 
-    // DnD: draggedItem을 targetItem의 특정 사분면에 삽입
-    // endDrop에서 한번에 처리하도록 일단 수정 중임
-
-    // insertItemAt: (draggedItemId, targetItemId, quadrant) => {
-    //     const { tree } = get();
-
-    //     if (!tree) {
-    //         console.warn('Tree not initialized');
-    //         return;
-    //     }
-
-    //     // TODO: Tree.insertItemAt 메서드 구현 후 호출
-    //     // tree.insertItemAt(draggedItemId, targetItemId, quadrant);
-
-    //     // 트리 재구성 후 nodes 업데이트
-    //     const nodes = flattenTreeToMap(tree.root);
-    //     set({ nodes });
-
-    //     console.log('Item inserted:', {
-    //         draggedItemId,
-    //         targetItemId,
-    //         quadrant,
-    //         nodeCount: nodes.size,
-    //     });
-    // },
-
     // 노드 조회
     getNode: (id) => {
         return get().nodes.get(id);
@@ -273,4 +257,6 @@ export const useTreeStore = create<TreeStore>((set, get) => ({
     getElementFromCache: (id) => {
         return get().elementsCache.get(id);
     },
+
+    setTranslates: (translates) => set({ translates }),
 }));

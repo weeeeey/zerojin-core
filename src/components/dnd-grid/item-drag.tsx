@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { cn } from '../../../lib/util';
 import { useTreeStore } from './actions/store';
 import { getQuadrantPosition } from './actions/util';
@@ -15,6 +16,9 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
     const endDrag = useTreeStore((state) => state.endDrag);
 
     const setDropQuadrant = useTreeStore((state) => state.setDropQuadrant);
+    const setTranslate = useTreeStore((s) => s.setTranslates);
+
+    const itemDragRef = useRef<HTMLDivElement>(null);
 
     const handleMouseDown = () => {
         if (!id) return;
@@ -22,8 +26,15 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
         startDrag(id);
 
         let lastMoveTime = 0;
-        const THROTTLE_MS = 16; // 60fps
+        const THROTTLE_MS = 16;
 
+        let [startX, startY] = [0, 0];
+
+        if (itemDragRef.current) {
+            const initRect = itemDragRef.current.getBoundingClientRect();
+            startX = initRect.left;
+            startY = initRect.top;
+        }
         const handleMouseMove = (e: MouseEvent) => {
             const now = Date.now();
 
@@ -64,6 +75,11 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
                 height: hoveredNode.height,
             });
 
+            setTranslate({
+                x: e.clientX - startX + 20,
+                y: e.clientY - startY + 20,
+            });
+
             setDropQuadrant(quadrant);
         };
 
@@ -79,6 +95,7 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
     };
     return (
         <div
+            ref={itemDragRef}
             className={cn('cursor-move', className)}
             onMouseDown={handleMouseDown}
         >

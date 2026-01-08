@@ -10,7 +10,7 @@ import {
 function AA() {
     const [a, aa] = useState(0);
 
-    return <div onClick={() => aa((v) => v + 1)}>{a}</div>;
+    return <div onClick={() => aa((v) => v + 1)}>{a} asd</div>;
 }
 
 export default function DndGrid() {
@@ -20,11 +20,10 @@ export default function DndGrid() {
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
                         <ItemDrag className="bg-red-300">
-                            <div>header</div>
+                            <DndGridItemContent>
+                                <AA />
+                            </DndGridItemContent>
                         </ItemDrag>
-                        <DndGridItemContent>
-                            <AA />
-                        </DndGridItemContent>
                     </DndGridItem>
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
@@ -47,20 +46,26 @@ export default function DndGrid() {
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridSplit direction="vertical" ratio={0.6}>
                         <DndGridItem>
-                            <DndGridItemContent>
-                                <AA />
-                            </DndGridItemContent>
+                            <ItemDrag>
+                                <DndGridItemContent>
+                                    <AA />
+                                </DndGridItemContent>
+                            </ItemDrag>
                         </DndGridItem>
                         <DndGridItem>
-                            <DndGridItemContent>
-                                <AA />
-                            </DndGridItemContent>
+                            <ItemDrag>
+                                <DndGridItemContent>
+                                    <AA />
+                                </DndGridItemContent>
+                            </ItemDrag>
                         </DndGridItem>
                     </DndGridSplit>
                     <DndGridItem>
-                        <DndGridItemContent>
-                            <AA />
-                        </DndGridItemContent>
+                        <ItemDrag>
+                            <DndGridItemContent>
+                                <AA />
+                            </DndGridItemContent>
+                        </ItemDrag>
                     </DndGridItem>
                 </DndGridSplit>
             </DndGridSplit>

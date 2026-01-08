@@ -35,36 +35,6 @@ Claude Desktop, Gemini CLI 등의 MCP 클라이언트 설정 파일에 다음을
 }
 ```
 
-### 방법 2: 로컬 개발 환경
-
-로컬에서 개발하거나 수정하려는 경우:
-
-1. **서버 빌드**
-
-```bash
-cd /path/to/zerojin-core/mcp
-npm install
-npm run build
-```
-
-2. **설정 파일 수정**
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-```json
-{
-    "mcpServers": {
-        "dndgrid": {
-            "command": "node",
-            "args": ["/absolute/path/to/zerojin-core/mcp/dist/index.js"]
-        }
-    }
-}
-```
-
-**중요**: `/absolute/path/to/zerojin-core`를 실제 프로젝트 경로로 변경하세요.
-
 3. **MCP 클라이언트 재시작**
 
 상세한 설정 가이드는 [QUICKSTART.md](./QUICKSTART.md)를 참조하세요.
