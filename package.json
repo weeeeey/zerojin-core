@@ -1,6 +1,6 @@
 {
     "name": "zerojin",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "description": "A collection of React hooks and components for modern web applications",
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
