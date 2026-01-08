@@ -42,6 +42,12 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
             if (now - lastMoveTime < THROTTLE_MS) return;
             lastMoveTime = now;
 
+            // 드래깅 중인 Item UI로 보여주기 위함
+            setTranslate({
+                x: e.clientX - startX + 20,
+                y: e.clientY - startY + 20,
+            });
+
             // 현재 호버된 아이템의 노드 정보 가져오기
             const state = useTreeStore.getState();
             const hoveredNode = state.hoveredItemId
@@ -73,11 +79,6 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
                 startTop: hoveredNode.top,
                 width: hoveredNode.width,
                 height: hoveredNode.height,
-            });
-
-            setTranslate({
-                x: e.clientX - startX + 20,
-                y: e.clientY - startY + 20,
             });
 
             setDropQuadrant(quadrant);
