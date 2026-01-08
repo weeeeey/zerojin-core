@@ -190,7 +190,12 @@ export const getQuadrantPosition = ({
     return 'bottom';
 };
 
-// Shadow 표시 헬퍼
+/**
+ * Shadow 표시 헬퍼
+ * @deprecated 이 함수는 더 이상 내부적으로 사용되지 않습니다.
+ * CSS의 `[data-drop-quadrant]` 선택자를 사용하여 스타일을 커스터마이징하세요.
+ * 참고용으로 계속 export되지만, 향후 major 버전에서 제거될 예정입니다.
+ */
 export function getQuadrantShadow(quadrant: DropQuadrant | null): string {
     if (quadrant === null) return '';
     const shadows: Record<DropQuadrant, string> = {

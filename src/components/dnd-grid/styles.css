@@ -1,0 +1,16 @@
+/* DndGrid Drop Indicator Styles */
+.dnd-grid-item[data-drop-quadrant="top"] {
+    box-shadow: inset 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+.dnd-grid-item[data-drop-quadrant="left"] {
+    box-shadow: inset 10px 0 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+.dnd-grid-item[data-drop-quadrant="right"] {
+    box-shadow: inset -10px 0 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+.dnd-grid-item[data-drop-quadrant="bottom"] {
+    box-shadow: inset 0 -10px 10px -5px rgba(0, 0, 0, 0.3);
+}

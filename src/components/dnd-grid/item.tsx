@@ -1,8 +1,6 @@
 'use client';
 
 import { cn } from '../../../lib/util';
-import { getQuadrantShadow } from './actions/util';
-
 import { useTreeStore } from './actions/store';
 
 import React, { useMemo } from 'react';
@@ -16,6 +14,7 @@ interface DndGridItemProps {
     height?: number;
     className?: string;
     allowDrop?: boolean;
+    dropIndicatorClassName?: string;
     children: React.ReactNode;
 }
 
@@ -27,6 +26,7 @@ export function DndGridItem({
     width,
     className,
     allowDrop = true,
+    dropIndicatorClassName,
     children,
 }: DndGridItemProps) {
     const isDragging = useTreeStore((state) => state.draggedItemId === id);
@@ -81,11 +81,14 @@ export function DndGridItem({
     return (
         <div
             key={id}
+            data-drop-quadrant={isHovered ? dropQuadrant : undefined}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             className={cn(
+                'dnd-grid-item',
                 'absolute border border-black box-border ',
                 isDragging ? 'bg-[#d0d0d0]  opacity-50' : '',
+                dropIndicatorClassName,
                 className
             )}
             style={{
@@ -93,7 +96,6 @@ export function DndGridItem({
                 height: `${height}px`,
                 top: `${top}px`,
                 left: `${left}px`,
-                boxShadow: isHovered ? getQuadrantShadow(dropQuadrant) : '',
                 transform: isDragging
                     ? `translate(${translate.x}px, ${translate.y}px)`
                     : `translate(0px, 0px)`,
