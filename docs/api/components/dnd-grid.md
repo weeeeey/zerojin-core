@@ -57,19 +57,29 @@ import {
 function MyDashboard() {
     return (
         <DndGridContainer width={1200} height={800}>
-            <DndGridSplit direction="vertical" ratio={0.2}>
-                {/* 사이드바 영역 */}
+            <DndGridSplit direction="horizontal" ratio={0.5}>
                 <DndGridItem>
-                    <Sidebar />
+                    <ItemDrag>
+                        <DndGridItemContent>
+                            <Sidebar />
+                        </DndGridItemContent>
+                    </ItemDrag>
                 </DndGridItem>
 
-                {/* 메인 콘텐츠 영역 */}
-                <DndGridSplit direction="horizontal" ratio={0.7}>
+                <DndGridSplit direction="vertical" ratio={0.5}>
                     <DndGridItem>
-                        <MainEditor />
+                        <ItemDrag>
+                            <DndGridItemContent>
+                                <CodeEditor />
+                            </DndGridItemContent>
+                        </ItemDrag>
                     </DndGridItem>
                     <DndGridItem>
-                        <Terminal />
+                        <ItemDrag>
+                            <DndGridItemContent>
+                                <Terminal />
+                            </DndGridItemContent>
+                        </ItemDrag>
                     </DndGridItem>
                 </DndGridSplit>
             </DndGridSplit>
