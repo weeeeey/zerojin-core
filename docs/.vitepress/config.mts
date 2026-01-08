@@ -34,7 +34,6 @@ export default defineConfig({
                     {
                         text: '컴포넌트',
                         items: [
-                            { text: '개요', link: '/api/components/' },
                             {
                                 text: 'dnd-grid',
                                 link: '/api/components/dnd-grid',
@@ -44,7 +43,6 @@ export default defineConfig({
                     {
                         text: '훅',
                         items: [
-                            { text: '개요', link: '/api/hooks/' },
                             {
                                 text: 'useThrottle',
                                 link: '/api/hooks/useThrottle',

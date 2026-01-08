@@ -333,9 +333,3 @@ const handleSearch = useDebouncedCallback((query: string) => {
 -   `useEffect`로 값 변경 감지 및 타이머 설정
 -   언마운트 시 타이머 자동 정리
 -   delay가 변경되면 타이머 재시작
-
-## 참고
-
--   [useDebouncedCallback](/api/hooks/useDebouncedCallback) - 함수 디바운싱
--   [useThrottle](/api/hooks/useThrottle) - 실행 빈도 제한
--   [훅 개요](/api/hooks/) - 사용 가능한 모든 훅

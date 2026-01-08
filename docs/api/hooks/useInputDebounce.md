@@ -6,17 +6,17 @@ input 값의 즉각적인 상태 업데이트와 debounced된 값을 함께 제�
 
 ```typescript
 function useInputDebounce<T>(
-  initialValue: T,
-  delay?: number
-): [T, T, (value: T) => void]
+    initialValue: T,
+    delay?: number
+): [T, T, (value: T) => void];
 ```
 
 ## 파라미터
 
-| 파라미터 | 타입 | 설명 |
-|-----------|------|-------------|
-| `initialValue` | `T` | 초기값 |
-| `delay` | `number` | 디바운스 지연 시간 (밀리초, 기본값: 500ms) |
+| 파라미터       | 타입     | 설명                                       |
+| -------------- | -------- | ------------------------------------------ |
+| `initialValue` | `T`      | 초기값                                     |
+| `delay`        | `number` | 디바운스 지연 시간 (밀리초, 기본값: 500ms) |
 
 ## 반환값
 
@@ -33,32 +33,32 @@ function useInputDebounce<T>(
 사용자가 입력을 멈출 때까지 기다렸다가 API 호출:
 
 ```tsx
-import { useInputDebounce } from 'zerojin'
-import { useEffect } from 'react'
+import { useInputDebounce } from 'zerojin';
+import { useEffect } from 'react';
 
 function SearchInput() {
-  const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
+    const [query, debouncedQuery, setQuery] = useInputDebounce('', 500);
 
-  useEffect(() => {
-    if (debouncedQuery) {
-      // 사용자가 500ms 동안 입력을 멈추면 검색 실행
-      console.log('Searching for:', debouncedQuery)
-      api.search(debouncedQuery)
-    }
-  }, [debouncedQuery])
+    useEffect(() => {
+        if (debouncedQuery) {
+            // 사용자가 500ms 동안 입력을 멈추면 검색 실행
+            console.log('Searching for:', debouncedQuery);
+            api.search(debouncedQuery);
+        }
+    }, [debouncedQuery]);
 
-  return (
-    <div>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="검색어를 입력하세요..."
-      />
-      <p>입력 중: {query}</p>
-      <p>검색 중: {debouncedQuery}</p>
-    </div>
-  )
+    return (
+        <div>
+            <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="검색어를 입력하세요..."
+            />
+            <p>입력 중: {query}</p>
+            <p>검색 중: {debouncedQuery}</p>
+        </div>
+    );
 }
 ```
 
@@ -68,30 +68,28 @@ function SearchInput() {
 
 ```tsx
 function DraftEditor() {
-  const [content, debouncedContent, setContent] = useInputDebounce('', 1000)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+    const [content, debouncedContent, setContent] = useInputDebounce('', 1000);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  useEffect(() => {
-    if (debouncedContent) {
-      localStorage.setItem('draft', debouncedContent)
-      setLastSaved(new Date())
-      console.log('Draft saved!')
-    }
-  }, [debouncedContent])
+    useEffect(() => {
+        if (debouncedContent) {
+            localStorage.setItem('draft', debouncedContent);
+            setLastSaved(new Date());
+            console.log('Draft saved!');
+        }
+    }, [debouncedContent]);
 
-  return (
-    <div>
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="여기에 작성하면 자동으로 저장됩니다..."
-        rows={10}
-      />
-      {lastSaved && (
-        <p>마지막 저장: {lastSaved.toLocaleTimeString()}</p>
-      )}
-    </div>
-  )
+    return (
+        <div>
+            <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="여기에 작성하면 자동으로 저장됩니다..."
+                rows={10}
+            />
+            {lastSaved && <p>마지막 저장: {lastSaved.toLocaleTimeString()}</p>}
+        </div>
+    );
 }
 ```
 
@@ -101,32 +99,32 @@ function DraftEditor() {
 
 ```tsx
 function EmailInput() {
-  const [email, debouncedEmail, setEmail] = useInputDebounce('', 300)
-  const [error, setError] = useState('')
+    const [email, debouncedEmail, setEmail] = useInputDebounce('', 300);
+    const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (debouncedEmail) {
-      if (!debouncedEmail.includes('@')) {
-        setError('유효한 이메일 주소를 입력하세요')
-      } else if (debouncedEmail.length < 5) {
-        setError('이메일이 너무 짧습니다')
-      } else {
-        setError('')
-      }
-    }
-  }, [debouncedEmail])
+    useEffect(() => {
+        if (debouncedEmail) {
+            if (!debouncedEmail.includes('@')) {
+                setError('유효한 이메일 주소를 입력하세요');
+            } else if (debouncedEmail.length < 5) {
+                setError('이메일이 너무 짧습니다');
+            } else {
+                setError('');
+            }
+        }
+    }, [debouncedEmail]);
 
-  return (
-    <div>
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="이메일"
-      />
-      {error && <span style={{ color: 'red' }}>{error}</span>}
-    </div>
-  )
+    return (
+        <div>
+            <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일"
+            />
+            {error && <span style={{ color: 'red' }}>{error}</span>}
+        </div>
+    );
 }
 ```
 
@@ -138,51 +136,49 @@ function EmailInput() {
 
 ```tsx
 interface SearchResult {
-  id: string
-  title: string
+    id: string;
+    title: string;
 }
 
 function LiveSearch() {
-  const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
-  const [results, setResults] = useState<SearchResult[]>([])
-  const [loading, setLoading] = useState(false)
+    const [query, debouncedQuery, setQuery] = useInputDebounce('', 500);
+    const [results, setResults] = useState<SearchResult[]>([]);
+    const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (debouncedQuery.length < 2) {
-      setResults([])
-      return
-    }
+    useEffect(() => {
+        if (debouncedQuery.length < 2) {
+            setResults([]);
+            return;
+        }
 
-    setLoading(true)
-    api.search(debouncedQuery)
-      .then(setResults)
-      .finally(() => setLoading(false))
-  }, [debouncedQuery])
+        setLoading(true);
+        api.search(debouncedQuery)
+            .then(setResults)
+            .finally(() => setLoading(false));
+    }, [debouncedQuery]);
 
-  return (
-    <div>
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="검색..."
-      />
+    return (
+        <div>
+            <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="검색..."
+            />
 
-      {/* 즉각적인 피드백 */}
-      {query && query.length < 2 && (
-        <p>최소 2자 이상 입력하세요</p>
-      )}
+            {/* 즉각적인 피드백 */}
+            {query && query.length < 2 && <p>최소 2자 이상 입력하세요</p>}
 
-      {/* 로딩 상태 */}
-      {loading && <p>검색 중...</p>}
+            {/* 로딩 상태 */}
+            {loading && <p>검색 중...</p>}
 
-      {/* 검색 결과 */}
-      <ul>
-        {results.map(result => (
-          <li key={result.id}>{result.title}</li>
-        ))}
-      </ul>
-    </div>
-  )
+            {/* 검색 결과 */}
+            <ul>
+                {results.map((result) => (
+                    <li key={result.id}>{result.title}</li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 ```
 
@@ -192,49 +188,55 @@ function LiveSearch() {
 
 ```tsx
 function SignupForm() {
-  const [username, debouncedUsername, setUsername] = useInputDebounce('', 500)
-  const [email, debouncedEmail, setEmail] = useInputDebounce('', 500)
-  const [errors, setErrors] = useState({ username: '', email: '' })
+    const [username, debouncedUsername, setUsername] = useInputDebounce(
+        '',
+        500
+    );
+    const [email, debouncedEmail, setEmail] = useInputDebounce('', 500);
+    const [errors, setErrors] = useState({ username: '', email: '' });
 
-  // Username 검증
-  useEffect(() => {
-    if (debouncedUsername.length > 0 && debouncedUsername.length < 3) {
-      setErrors(prev => ({ ...prev, username: '3자 이상 입력하세요' }))
-    } else {
-      setErrors(prev => ({ ...prev, username: '' }))
-    }
-  }, [debouncedUsername])
+    // Username 검증
+    useEffect(() => {
+        if (debouncedUsername.length > 0 && debouncedUsername.length < 3) {
+            setErrors((prev) => ({ ...prev, username: '3자 이상 입력하세요' }));
+        } else {
+            setErrors((prev) => ({ ...prev, username: '' }));
+        }
+    }, [debouncedUsername]);
 
-  // Email 검증
-  useEffect(() => {
-    if (debouncedEmail && !debouncedEmail.includes('@')) {
-      setErrors(prev => ({ ...prev, email: '유효한 이메일을 입력하세요' }))
-    } else {
-      setErrors(prev => ({ ...prev, email: '' }))
-    }
-  }, [debouncedEmail])
+    // Email 검증
+    useEffect(() => {
+        if (debouncedEmail && !debouncedEmail.includes('@')) {
+            setErrors((prev) => ({
+                ...prev,
+                email: '유효한 이메일을 입력하세요',
+            }));
+        } else {
+            setErrors((prev) => ({ ...prev, email: '' }));
+        }
+    }, [debouncedEmail]);
 
-  return (
-    <form>
-      <div>
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="사용자 이름"
-        />
-        {errors.username && <span>{errors.username}</span>}
-      </div>
+    return (
+        <form>
+            <div>
+                <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="사용자 이름"
+                />
+                {errors.username && <span>{errors.username}</span>}
+            </div>
 
-      <div>
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="이메일"
-        />
-        {errors.email && <span>{errors.email}</span>}
-      </div>
-    </form>
-  )
+            <div>
+                <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="이메일"
+                />
+                {errors.email && <span>{errors.email}</span>}
+            </div>
+        </form>
+    );
 }
 ```
 
@@ -244,31 +246,31 @@ function SignupForm() {
 
 ```tsx
 function SmartSearch() {
-  const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
-  const [results, setResults] = useState([])
-  const lastSearchRef = useRef('')
+    const [query, debouncedQuery, setQuery] = useInputDebounce('', 500);
+    const [results, setResults] = useState([]);
+    const lastSearchRef = useRef('');
 
-  useEffect(() => {
-    // 이전 검색어와 동일하면 API 호출 스킵
-    if (debouncedQuery === lastSearchRef.current) {
-      return
-    }
+    useEffect(() => {
+        // 이전 검색어와 동일하면 API 호출 스킵
+        if (debouncedQuery === lastSearchRef.current) {
+            return;
+        }
 
-    if (debouncedQuery) {
-      lastSearchRef.current = debouncedQuery
-      api.search(debouncedQuery).then(setResults)
-    } else {
-      setResults([])
-    }
-  }, [debouncedQuery])
+        if (debouncedQuery) {
+            lastSearchRef.current = debouncedQuery;
+            api.search(debouncedQuery).then(setResults);
+        } else {
+            setResults([]);
+        }
+    }, [debouncedQuery]);
 
-  return (
-    <input
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      placeholder="검색..."
-    />
-  )
+    return (
+        <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="검색..."
+        />
+    );
 }
 ```
 
@@ -278,30 +280,30 @@ function SmartSearch() {
 
 ```tsx
 function PriceFilter() {
-  const [minPrice, debouncedMin, setMinPrice] = useInputDebounce(0, 500)
-  const [maxPrice, debouncedMax, setMaxPrice] = useInputDebounce(1000, 500)
+    const [minPrice, debouncedMin, setMinPrice] = useInputDebounce(0, 500);
+    const [maxPrice, debouncedMax, setMaxPrice] = useInputDebounce(1000, 500);
 
-  useEffect(() => {
-    console.log('Filtering:', debouncedMin, '~', debouncedMax)
-    api.filterByPrice(debouncedMin, debouncedMax)
-  }, [debouncedMin, debouncedMax])
+    useEffect(() => {
+        console.log('Filtering:', debouncedMin, '~', debouncedMax);
+        api.filterByPrice(debouncedMin, debouncedMax);
+    }, [debouncedMin, debouncedMax]);
 
-  return (
-    <div>
-      <input
-        type="number"
-        value={minPrice}
-        onChange={(e) => setMinPrice(Number(e.target.value))}
-        placeholder="최소 가격"
-      />
-      <input
-        type="number"
-        value={maxPrice}
-        onChange={(e) => setMaxPrice(Number(e.target.value))}
-        placeholder="최대 가격"
-      />
-    </div>
-  )
+    return (
+        <div>
+            <input
+                type="number"
+                value={minPrice}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                placeholder="최소 가격"
+            />
+            <input
+                type="number"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                placeholder="최대 가격"
+            />
+        </div>
+    );
 }
 ```
 
@@ -312,7 +314,7 @@ function PriceFilter() {
 `value`는 즉시 업데이트되어 사용자 입력에 즉각 반응:
 
 ```tsx
-const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
+const [query, debouncedQuery, setQuery] = useInputDebounce('', 500);
 
 // query는 즉시 업데이트 → UI가 즉각 반응
 // debouncedQuery는 500ms 후 업데이트 → API 호출에 사용
@@ -333,80 +335,78 @@ const [query, debouncedQuery, setQuery] = useInputDebounce('', 500)
 
 ```tsx
 // 문자열
-const [name, debouncedName, setName] = useInputDebounce<string>('', 300)
+const [name, debouncedName, setName] = useInputDebounce<string>('', 300);
 
 // 숫자
-const [age, debouncedAge, setAge] = useInputDebounce<number>(0, 500)
+const [age, debouncedAge, setAge] = useInputDebounce<number>(0, 500);
 
 // 객체
-const [user, debouncedUser, setUser] = useInputDebounce<User>({
-  name: '',
-  email: ''
-}, 1000)
+const [user, debouncedUser, setUser] = useInputDebounce<User>(
+    {
+        name: '',
+        email: '',
+    },
+    1000
+);
 ```
 
 ## 언제 사용할까
 
 ✅ **다음과 같은 경우 사용하세요:**
 
-- **검색 입력**: 사용자가 입력을 멈출 때 검색
-- **자동 저장**: 입력이 완료되면 자동 저장
-- **폼 검증**: 입력이 끝난 후 유효성 검사
-- **필터링**: 실시간 필터 적용 (가격, 카테고리 등)
-- **API 호출 최적화**: 불필요한 API 요청 방지
+-   **검색 입력**: 사용자가 입력을 멈출 때 검색
+-   **자동 저장**: 입력이 완료되면 자동 저장
+-   **폼 검증**: 입력이 끝난 후 유효성 검사
+-   **필터링**: 실시간 필터 적용 (가격, 카테고리 등)
+-   **API 호출 최적화**: 불필요한 API 요청 방지
 
 ✅ **장점:**
 
-- 즉각적인 UI 반응 + 최적화된 API 호출
-- 간단한 사용법 (튜플 구조분해)
-- `useDebounce` 기반으로 안정적
-- TypeScript 완벽 지원
+-   즉각적인 UI 반응 + 최적화된 API 호출
+-   간단한 사용법 (튜플 구조분해)
+-   `useDebounce` 기반으로 안정적
+-   TypeScript 완벽 지원
 
 ## 언제 사용하지 말아야 할까
 
 ❌ **다음과 같은 경우 사용하지 마세요:**
 
-- **즉시 실행이 필요한 경우**
-  - `useState`만 사용
+-   **즉시 실행이 필요한 경우**
 
-- **더 세밀한 제어가 필요한 경우** (leading/trailing, cancel, flush)
-  - `useDebouncedCallback` 사용
+    -   `useState`만 사용
 
-- **throttle이 더 적합한 경우** (스크롤, 리사이즈)
-  - `useThrottle` 사용
+-   **더 세밀한 제어가 필요한 경우** (leading/trailing, cancel, flush)
+
+    -   `useDebouncedCallback` 사용
+
+-   **throttle이 더 적합한 경우** (스크롤, 리사이즈)
+    -   `useThrottle` 사용
 
 ## useDebounce vs useDebouncedCallback vs useInputDebounce
 
-| 특성 | useDebounce | useDebouncedCallback | useInputDebounce |
-|------|-------------|---------------------|------------------|
-| **용도** | 값 debounce | 함수 debounce | Input 값 debounce |
-| **반환값** | Debounced 값 | Debounced 함수 | [value, debouncedValue, setValue] |
-| **제어** | 자동 | cancel, flush 메서드 제공 | 자동 debounce만 제공 |
-| **사용 예** | 상태 값 | 이벤트 핸들러, 콜백 | input, textarea, 폼 필드 |
-| **복잡도** | 간단 | 더 많은 제어 가능 | 간단하고 직관적 |
+| 특성        | useDebounce  | useDebouncedCallback      | useInputDebounce                  |
+| ----------- | ------------ | ------------------------- | --------------------------------- |
+| **용도**    | 값 debounce  | 함수 debounce             | Input 값 debounce                 |
+| **반환값**  | Debounced 값 | Debounced 함수            | [value, debouncedValue, setValue] |
+| **제어**    | 자동         | cancel, flush 메서드 제공 | 자동 debounce만 제공              |
+| **사용 예** | 상태 값      | 이벤트 핸들러, 콜백       | input, textarea, 폼 필드          |
+| **복잡도**  | 간단         | 더 많은 제어 가능         | 간단하고 직관적                   |
 
 ## 사용 사례 비교
 
-| 시나리오 | useDebounce | useDebouncedCallback | useInputDebounce |
-|---------|-------------|---------------------|------------------|
-| 검색 입력 자동완성 | ✅ | ❌ | ✅ |
-| 버튼 클릭 보호 | ❌ | ✅ | ❌ |
-| 스크롤 이벤트 | ❌ | ✅ | ❌ |
-| 폼 자동 저장 | ✅ | ❌ | ✅ |
-| API 호출 최적화 (input) | ✅ | ❌ | ✅ |
-| 윈도우 리사이즈 | ❌ | ✅ | ❌ |
+| 시나리오                | useDebounce | useDebouncedCallback | useInputDebounce |
+| ----------------------- | ----------- | -------------------- | ---------------- |
+| 검색 입력 자동완성      | ✅          | ❌                   | ✅               |
+| 버튼 클릭 보호          | ❌          | ✅                   | ❌               |
+| 스크롤 이벤트           | ❌          | ✅                   | ❌               |
+| 폼 자동 저장            | ✅          | ❌                   | ✅               |
+| API 호출 최적화 (input) | ✅          | ❌                   | ✅               |
+| 윈도우 리사이즈         | ❌          | ✅                   | ❌               |
 
 ## 구현 세부사항
 
-- **검증된 로직**: 안정적인 debounce 구현 활용
-- **즉각적인 상태**: `value`는 즉시 업데이트로 UI 반응성 보장
-- **자동 정리**: 컴포넌트 언마운트 시 자동으로 타이머 정리
-- **메모리 효율**: 최소한의 상태만 관리
-- **타입 안전**: 제네릭을 통한 완벽한 타입 추론
-
-## 참고
-
-- [useDebounce](/api/hooks/useDebounce) - 값 디바운싱
-- [useDebouncedCallback](/api/hooks/useDebouncedCallback) - 함수 디바운싱
-- [useThrottle](/api/hooks/useThrottle) - 함수 쓰로틀링
-- [훅 개요](/api/hooks/) - 사용 가능한 모든 훅
+-   **검증된 로직**: 안정적인 debounce 구현 활용
+-   **즉각적인 상태**: `value`는 즉시 업데이트로 UI 반응성 보장
+-   **자동 정리**: 컴포넌트 언마운트 시 자동으로 타이머 정리
+-   **메모리 효율**: 최소한의 상태만 관리
+-   **타입 안전**: 제네릭을 통한 완벽한 타입 추론

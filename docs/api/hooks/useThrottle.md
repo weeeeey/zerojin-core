@@ -6,44 +6,44 @@
 
 ```typescript
 function useThrottle<T extends (...args: any[]) => any>(
-  callback: T,
-  delay?: number,
-  options?: ThrottleOptions
-): ThrottledFunction<T>
+    callback: T,
+    delay?: number,
+    options?: ThrottleOptions
+): ThrottledFunction<T>;
 
 interface ThrottleOptions {
-  leading?: boolean   // 첫 호출 시 실행 (기본값: true)
-  trailing?: boolean  // 기간 후 실행 (기본값: false)
+    leading?: boolean; // 첫 호출 시 실행 (기본값: true)
+    trailing?: boolean; // 기간 후 실행 (기본값: false)
 }
 
 interface ThrottledFunction<T> {
-  (...args: Parameters<T>): ReturnType<T> | undefined
-  cancel: () => void
-  flush: () => void
+    (...args: Parameters<T>): ReturnType<T> | undefined;
+    cancel: () => void;
+    flush: () => void;
 }
 ```
 
 ## 파라미터
 
-| 파라미터 | 타입 | 기본값 | 설명 |
-|-----------|------|---------|-------------|
-| `callback` | `T extends Function` | 필수 | 스로틀할 함수 |
-| `delay` | `number` | `500` | 밀리초 단위 스로틀 기간 |
-| `options` | `ThrottleOptions` | `{ leading: true, trailing: false }` | 스로틀 동작 옵션 |
+| 파라미터   | 타입                 | 기본값                               | 설명                    |
+| ---------- | -------------------- | ------------------------------------ | ----------------------- |
+| `callback` | `T extends Function` | 필수                                 | 스로틀할 함수           |
+| `delay`    | `number`             | `500`                                | 밀리초 단위 스로틀 기간 |
+| `options`  | `ThrottleOptions`    | `{ leading: true, trailing: false }` | 스로틀 동작 옵션        |
 
 ### 옵션
 
-| 옵션 | 타입 | 기본값 | 설명 |
-|--------|------|---------|-------------|
-| `leading` | `boolean` | `true` | 첫 호출 시 콜백을 즉시 실행 (leading edge) |
-| `trailing` | `boolean` | `false` | delay 기간 후 콜백 실행 (trailing edge) |
+| 옵션       | 타입      | 기본값  | 설명                                       |
+| ---------- | --------- | ------- | ------------------------------------------ |
+| `leading`  | `boolean` | `true`  | 첫 호출 시 콜백을 즉시 실행 (leading edge) |
+| `trailing` | `boolean` | `false` | delay 기간 후 콜백 실행 (trailing edge)    |
 
 ## 반환값
 
 원본 콜백과 동일한 시그니처를 가진 스로틀 함수를 반환하며, 두 가지 제어 메서드가 추가됩니다:
 
-- **`cancel()`**: 대기 중인 실행을 취소하고 타이머를 리셋
-- **`flush()`**: 대기 중인 콜백을 즉시 실행
+-   **`cancel()`**: 대기 중인 실행을 취소하고 타이머를 리셋
+-   **`flush()`**: 대기 중인 콜백을 즉시 실행
 
 ## 기본 예제
 
@@ -52,28 +52,28 @@ interface ThrottledFunction<T> {
 스크롤 위치를 기반으로 UI를 업데이트하지만, 모든 픽셀마다 업데이트하지 않음:
 
 ```tsx
-import { useThrottle } from 'zerojin'
+import { useThrottle } from 'zerojin';
 
 function ScrollTracker() {
-  const [scrollY, setScrollY] = useState(0)
+    const [scrollY, setScrollY] = useState(0);
 
-  const handleScroll = useThrottle(
-    () => {
-      setScrollY(window.scrollY)
-      console.log('스크롤 위치:', window.scrollY)
-    },
-    200  // 200ms마다 최대 한 번 업데이트
-  )
+    const handleScroll = useThrottle(
+        () => {
+            setScrollY(window.scrollY);
+            console.log('스크롤 위치:', window.scrollY);
+        },
+        200 // 200ms마다 최대 한 번 업데이트
+    );
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
-    return () => {
-      handleScroll.flush()  // 최종 위치 가져오기
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [])
+    useEffect(() => {
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+            handleScroll.flush(); // 최종 위치 가져오기
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
 
-  return <div>현재 스크롤: {scrollY}px</div>
+    return <div>현재 스크롤: {scrollY}px</div>;
 }
 ```
 
@@ -83,27 +83,28 @@ function ScrollTracker() {
 
 ```tsx
 function ResponsiveLayout() {
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight
-  })
-
-  const handleResize = useThrottle(
-    () => {
-      setDimensions({
+    const [dimensions, setDimensions] = useState({
         width: window.innerWidth,
-        height: window.innerHeight
-      })
-    },
-    300
-  )
+        height: window.innerHeight,
+    });
 
-  useEffect(() => {
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+    const handleResize = useThrottle(() => {
+        setDimensions({
+            width: window.innerWidth,
+            height: window.innerHeight,
+        });
+    }, 300);
 
-  return <div>윈도우: {dimensions.width}x{dimensions.height}</div>
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return (
+        <div>
+            윈도우: {dimensions.width}x{dimensions.height}
+        </div>
+    );
 }
 ```
 
@@ -113,20 +114,16 @@ function ResponsiveLayout() {
 
 ```tsx
 function RefreshButton() {
-  const handleRefresh = useThrottle(
-    () => {
-      console.log('데이터 새로고침...')
-      api.fetchData()
-    },
-    2000,  // 2초마다 최대 한 번
-    { leading: true, trailing: false }
-  )
+    const handleRefresh = useThrottle(
+        () => {
+            console.log('데이터 새로고침...');
+            api.fetchData();
+        },
+        2000, // 2초마다 최대 한 번
+        { leading: true, trailing: false }
+    );
 
-  return (
-    <button onClick={handleRefresh}>
-      데이터 새로고침
-    </button>
-  )
+    return <button onClick={handleRefresh}>데이터 새로고침</button>;
 }
 ```
 
@@ -138,21 +135,25 @@ function RefreshButton() {
 
 ```tsx
 function MouseTracker() {
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const trackMouse = useThrottle(
-    (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY })
-    },
-    100  // 초당 최대 10회 업데이트
-  )
+    const trackMouse = useThrottle(
+        (e: MouseEvent) => {
+            setPosition({ x: e.clientX, y: e.clientY });
+        },
+        100 // 초당 최대 10회 업데이트
+    );
 
-  useEffect(() => {
-    window.addEventListener('mousemove', trackMouse)
-    return () => window.removeEventListener('mousemove', trackMouse)
-  }, [])
+    useEffect(() => {
+        window.addEventListener('mousemove', trackMouse);
+        return () => window.removeEventListener('mousemove', trackMouse);
+    }, []);
 
-  return <div>마우스: ({position.x}, {position.y})</div>
+    return (
+        <div>
+            마우스: ({position.x}, {position.y})
+        </div>
+    );
 }
 ```
 
@@ -162,22 +163,26 @@ API 호출이 속도 제한을 초과하지 않도록 보장:
 
 ```tsx
 function DataFetcher() {
-  const fetchData = useThrottle(
-    (endpoint: string) => {
-      console.log('가져오는 중:', endpoint)
-      fetch(endpoint)
-        .then(res => res.json())
-        .then(data => console.log(data))
-    },
-    1000  // 초당 최대 1개 요청
-  )
+    const fetchData = useThrottle(
+        (endpoint: string) => {
+            console.log('가져오는 중:', endpoint);
+            fetch(endpoint)
+                .then((res) => res.json())
+                .then((data) => console.log(data));
+        },
+        1000 // 초당 최대 1개 요청
+    );
 
-  return (
-    <div>
-      <button onClick={() => fetchData('/api/users')}>사용자 가져오기</button>
-      <button onClick={() => fetchData('/api/posts')}>게시물 가져오기</button>
-    </div>
-  )
+    return (
+        <div>
+            <button onClick={() => fetchData('/api/users')}>
+                사용자 가져오기
+            </button>
+            <button onClick={() => fetchData('/api/posts')}>
+                게시물 가져오기
+            </button>
+        </div>
+    );
 }
 ```
 
@@ -187,18 +192,16 @@ function DataFetcher() {
 
 ```tsx
 function AutoSaveEditor() {
-  const saveContent = useThrottle(
-    (content: string) => {
-      console.log('저장:', content)
-      api.save(content)
-    },
-    5000,  // 최소 5초마다 저장
-    { leading: false, trailing: true }
-  )
+    const saveContent = useThrottle(
+        (content: string) => {
+            console.log('저장:', content);
+            api.save(content);
+        },
+        5000, // 최소 5초마다 저장
+        { leading: false, trailing: true }
+    );
 
-  return (
-    <textarea onChange={(e) => saveContent(e.target.value)} />
-  )
+    return <textarea onChange={(e) => saveContent(e.target.value)} />;
 }
 ```
 
@@ -208,21 +211,18 @@ function AutoSaveEditor() {
 
 ```tsx
 function Analytics() {
-  const trackEvent = useThrottle(
-    (event: string) => {
-      analytics.track(event)
-    },
-    1000
-  )
+    const trackEvent = useThrottle((event: string) => {
+        analytics.track(event);
+    }, 1000);
 
-  useEffect(() => {
-    return () => {
-      // 언마운트 전 최종 이벤트 전송
-      trackEvent.flush()
-    }
-  }, [])
+    useEffect(() => {
+        return () => {
+            // 언마운트 전 최종 이벤트 전송
+            trackEvent.flush();
+        };
+    }, []);
 
-  return <button onClick={() => trackEvent('click')}>추적</button>
+    return <button onClick={() => trackEvent('click')}>추적</button>;
 }
 ```
 
@@ -232,25 +232,22 @@ function Analytics() {
 
 ```tsx
 function InfiniteScroll() {
-  const loadMore = useThrottle(
-    () => {
-      const scrollPosition = window.scrollY + window.innerHeight
-      const pageHeight = document.documentElement.scrollHeight
+    const loadMore = useThrottle(() => {
+        const scrollPosition = window.scrollY + window.innerHeight;
+        const pageHeight = document.documentElement.scrollHeight;
 
-      if (scrollPosition >= pageHeight - 100) {
-        console.log('더 로드 중...')
-        api.loadMoreItems()
-      }
-    },
-    500
-  )
+        if (scrollPosition >= pageHeight - 100) {
+            console.log('더 로드 중...');
+            api.loadMoreItems();
+        }
+    }, 500);
 
-  useEffect(() => {
-    window.addEventListener('scroll', loadMore)
-    return () => window.removeEventListener('scroll', loadMore)
-  }, [])
+    useEffect(() => {
+        window.addEventListener('scroll', loadMore);
+        return () => window.removeEventListener('scroll', loadMore);
+    }, []);
 
-  return <div>스크롤하여 더 로드...</div>
+    return <div>스크롤하여 더 로드...</div>;
 }
 ```
 
@@ -259,17 +256,14 @@ function InfiniteScroll() {
 완벽한 타입 추론:
 
 ```tsx
-const processData = useThrottle(
-  (data: { id: number; name: string }) => {
-    console.log('처리 중:', data)
-    return data.id
-  },
-  1000
-)
+const processData = useThrottle((data: { id: number; name: string }) => {
+    console.log('처리 중:', data);
+    return data.id;
+}, 1000);
 
 // 타입 안전
-const result = processData({ id: 1, name: 'John' })  // number | undefined
-processData({ invalid: true })  // ❌ 타입 에러
+const result = processData({ id: 1, name: 'John' }); // number | undefined
+processData({ invalid: true }); // ❌ 타입 에러
 ```
 
 ## 언제 사용할까
@@ -277,36 +271,41 @@ processData({ invalid: true })  // ❌ 타입 에러
 다음과 같은 경우 `useThrottle`을 사용하세요:
 
 ✅ **실행 빈도 제한**
-- 스크롤 이벤트 핸들러
-- 윈도우 리사이즈 핸들러
-- 마우스/터치 이동 추적
+
+-   스크롤 이벤트 핸들러
+-   윈도우 리사이즈 핸들러
+-   마우스/터치 이동 추적
 
 ✅ **최대 실행 속도 보장**
-- API 속도 제한
-- 분석 추적
-- 성능 모니터링
+
+-   API 속도 제한
+-   분석 추적
+-   성능 모니터링
 
 ✅ **연속 이벤트 중 주기적 실행**
-- 사용자 상호작용 중 실시간 업데이트
-- 진행 상황 추적
+
+-   사용자 상호작용 중 실시간 업데이트
+-   진행 상황 추적
 
 ## 언제 사용하지 말아야 할까
 
 ❌ **최종 값만 필요한 경우**
-- 검색 입력에는 `useDebounce` 또는 `useDebouncedCallback` 사용
-- 폼 유효성 검사에는 `useDebouncedCallback` 사용
+
+-   검색 입력에는 `useDebounce` 또는 `useDebouncedCallback` 사용
+-   폼 유효성 검사에는 `useDebouncedCallback` 사용
 
 ❌ **일회성 이벤트의 경우**
-- 함수를 직접 호출하세요
+
+-   함수를 직접 호출하세요
 
 ## Debounce vs Throttle
 
-| 시나리오 | useThrottle | useDebounce / useDebouncedCallback |
-|----------|-------------|-------------------------------------|
-| 스크롤 추적 | ✅ 주기적으로 업데이트 | ❌ 끝에서만 실행 |
-| 검색 입력 | ❌ 입력 중에도 검색 | ✅ 입력이 멈출 때까지 대기 |
-| 속도 제한 | ✅ 최대 속도 보장 | ❌ 예측 불가능한 타이밍 |
-| 자동 저장 | ⚠️ 너무 자주 저장할 수 있음 | ✅ 편집이 끝난 후 저장 |
+| 시나리오    | useThrottle                 | useDebounce / useDebouncedCallback |
+| ----------- | --------------------------- | ---------------------------------- |
+| 스크롤 추적 | ✅ 주기적으로 업데이트      | ❌ 끝에서만 실행                   |
+| 검색 입력   | ❌ 입력 중에도 검색         | ✅ 입력이 멈출 때까지 대기         |
+| 속도 제한   | ✅ 최대 속도 보장           | ❌ 예측 불가능한 타이밍            |
+| 자동 저장   | ⚠️ 너무 자주 저장할 수 있음 | ✅ 편집이 끝난 후 저장             |
 
 ## Throttle 동작
 
@@ -342,14 +341,8 @@ processData({ invalid: true })  // ❌ 타입 에러
 
 ## 구현 세부사항
 
-- stale closure 문제를 방지하기 위해 `useRef` 사용
-- 안정적인 함수 참조를 위해 `useCallback` 사용
-- 언마운트 시 타이머를 자동으로 정리
-- Leading edge는 쿨다운 기간을 생성
-- Trailing edge는 기간 끝에 실행을 예약
-
-## 참고
-
-- [useDebounce](/api/hooks/useDebounce) - 값 디바운싱
-- [useDebouncedCallback](/api/hooks/useDebouncedCallback) - 함수 디바운싱
-- [훅 개요](/api/hooks/) - 사용 가능한 모든 훅
+-   stale closure 문제를 방지하기 위해 `useRef` 사용
+-   안정적인 함수 참조를 위해 `useCallback` 사용
+-   언마운트 시 타이머를 자동으로 정리
+-   Leading edge는 쿨다운 기간을 생성
+-   Trailing edge는 기간 끝에 실행을 예약

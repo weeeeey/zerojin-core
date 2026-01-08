@@ -265,8 +265,3 @@ updateUser({ id: 1, name: 'John' }, { notify: true });
 -   언마운트 시 타이머를 자동으로 정리
 -   Leading edge는 쿨다운 기간을 생성
 -   Trailing edge는 각 호출마다 재설정
-
-## 참고
-
--   [useThrottle](/api/hooks/useThrottle) - 실행 빈도 제한
--   [훅 개요](/api/hooks/) - 사용 가능한 모든 훅

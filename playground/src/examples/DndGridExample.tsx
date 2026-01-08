@@ -19,7 +19,7 @@ export default function DndGrid() {
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
-                        <ItemDrag className="bg-red-300">
+                        <ItemDrag>
                             <DndGridItemContent>
                                 <AA />
                             </DndGridItemContent>
@@ -28,10 +28,11 @@ export default function DndGrid() {
                     <DndGridSplit direction="horizontal" ratio={0.6}>
                         <DndGridItem>
                             <ItemDrag>
-                                <DndGridItemContent>
-                                    <AA />
-                                </DndGridItemContent>
+                                <button>drag 버튼</button>
                             </ItemDrag>
+                            <DndGridItemContent>
+                                <AA />
+                            </DndGridItemContent>
                         </DndGridItem>
                         <DndGridItem>
                             <ItemDrag>

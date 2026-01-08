@@ -1,155 +1,4 @@
-## 상태 보존 전략
-
-### 문제: DnD 후 children 상태 초기화
-
-```tsx
-function AA() {
-    const [count, setCount] = useState(0);
-    return <div onClick={() => setCount((v) => v + 1)}>{count}</div>;
-}
-
-// [문제 상황
-// DnD 전: count = 3
-// DnD 후: count = 0 ← 리마운트로 인한 초기화
-```
-
-### 시도 1: cloneElement (실패)
-
-**가설:** `React.createElement`가 매번 새 엘리먼트를 생성하여 리마운트
-
-**해결책:** 원본 엘리먼트를 캐시하고 `cloneElement` 사용
-
-```typescript
-// parseChildren에서 원본 저장
-saveElementToCache(nodeId, node);
-
-// buildReactTreeFromNode에서 cloneElement
-const cachedElement = getElementFromCache(item.id);
-return React.cloneElement(cachedElement, {
-    id: item.id,
-    top: item.top,
-    // ... layout props만 업데이트
-});
-```
-
-**결과:** ❌ 여전히 초기화됨
-
-**이유:** React Reconciliation은 **트리 위치(depth)**도 비교
-
-```tsx
-// Before
-<Split depth=1>
-  <Item depth=2 key=2><AA /></Item>  ← depth 2
-</Split>
-
-// After (새 Split 생성)
-<Split depth=1>
-  <Split depth=2>  ← 새로 생성
-    <Item depth=3 key=2><AA /></Item>  ← depth 3 (변경!)
-  </Split>
-</Split>
-
-// React 판단: depth가 다름 → 다른 컴포넌트 → 리마운트
-```
-
-### 시도 2: Flat 렌더링 (성공) ✅
-
-**핵심 아이디어:** 모든 Item을 **같은 depth**에 렌더링
-
-```tsx
-// Flat 구조
-<DndGridContainer>
-  <DndGridItem id=2 key=2 top={0} left={0}><AA /></DndGridItem>
-  <DndGridItem id=3 key=3 top={0} left={400} />
-  <DndGridItem id=5 key=5 top={300} left={0} />
-</DndGridContainer>
-```
-
-**React Reconciliation 체크:**
-
-1. ✅ 타입: `DndGridItem` (동일)
-2. ✅ Key: `id=2` (동일)
-3. ✅ **Depth: 1 (항상 동일!)**
-
-**결과:** React가 같은 컴포넌트로 인식 → 재사용 → **상태 유지**
-
-### 구현: collectAllItems + cloneElement
-
-```typescript
-// 1. Tree에서 모든 Item 추출 (flat array)
-const items = collectAllItems(tree.root);
-
-// 2. 각 Item을 cloneElement로 렌더링
-const renderedItems = items.map((item) => {
-    const cachedElement = getElementFromCache(item.id);
-    const cachedChildren = getChildrenFromCache(item.id);
-
-    return React.cloneElement(cachedElement, {
-        key: item.id,
-        id: item.id,
-        top: item.top,
-        left: item.left,
-        width: item.width,
-        height: item.height,
-        children: cachedChildren, // 원본 children 참조 유지
-    });
-});
-
-// 3. Flat 배열로 렌더링
-setEnhancedChildren(renderedItems);
-```
-
-### 캐싱 전략
-
-```typescript
-// Store
-interface TreeStore {
-    childrenCache: Map<number, React.ReactNode>;
-    elementsCache: Map<number, React.ReactElement>;
-
-    saveChildrenToCache(id: number, children: React.ReactNode): void;
-    saveElementToCache(id: number, element: React.ReactElement): void;
-}
-
-// parseChildren에서 캐싱
-saveElementToCache(nodeId, node); // 원본 <DndGridItem> 엘리먼트
-saveChildrenToCache(nodeId, props.children); // 원본 <AA /> children
-
-// rebuildTree에서 사용
-const cachedElement = getElementFromCache(item.id); // 참조 유지
-const cachedChildren = getChildrenFromCache(item.id); // 참조 유지
-```
-
-**왜 두 개를 캐싱하는가?**
-
-1. **elementsCache**: `React.cloneElement`를 위한 원본 엘리먼트
-
-    - 동일한 React 엘리먼트 참조 유지
-    - React의 fiber reconciliation에서 재사용 가능
-
-2. **childrenCache**: 사용자 컴포넌트 참조 유지
-    - `<AA />` 같은 실제 children
-    - props 변경 없이 동일 참조 유지
-
-### 결과
-
-```tsx
-// DnD 전
-<AA /> → count = 3
-
-// DnD 실행 (Tree 재구조화)
-restructureByDrop() → Tree 변경 → rebuildTree()
-
-// DnD 후
-<AA /> → count = 3  ✅ 상태 유지!
-```
-
----
-
-
-
-
-# Trouble shooting
+# DndGrid Component - React State Preservation 트러블슈팅
 
 ## 문제 상황
 
@@ -490,7 +339,7 @@ Next.js App Router 환경에서 **첫 번째 DnD 실행 시** Item Content 컴�
 // app/page.tsx
 function UserComponent() {
     const [count, setCount] = useState(0);
-    return <div onClick={() => setCount(v => v + 1)}>{count}</div>;
+    return <div onClick={() => setCount((v) => v + 1)}>{count}</div>;
 }
 
 export default function Page() {
@@ -505,9 +354,10 @@ export default function Page() {
 ```
 
 **증상:**
-- 첫 번째 DnD 전: `<UserComponent />`를 클릭하여 count를 5까지 증가
-- 첫 번째 DnD 실행: Item을 다른 위치로 드래그
-- DnD 후: count가 0으로 초기화 (이후 DnD에서는 정상 작동)
+
+-   첫 번째 DnD 전: `<UserComponent />`를 클릭하여 count를 5까지 증가
+-   첫 번째 DnD 실행: Item을 다른 위치로 드래그
+-   DnD 후: count가 0으로 초기화 (이후 DnD에서는 정상 작동)
 
 ### 원인 분석
 
@@ -538,11 +388,11 @@ Next.js App Router는 기본적으로 모든 컴포넌트를 **Server Component*
 
 #### 핵심 문제점
 
-- **Server Component**는 서버에서 한 번 렌더링되고, 클라이언트에서 hydrate됨
-- Zustand store는 **클라이언트 전용** 상태 관리 라이브러리
-- 첫 DnD 시 서버 렌더링 결과와 클라이언트 상태 간 불일치 발생
-- React가 hydration mismatch를 감지하고 컴포넌트를 재마운트
-- 이후 DnD부터는 이미 클라이언트 상태로 완전히 전환되어 정상 작동
+-   **Server Component**는 서버에서 한 번 렌더링되고, 클라이언트에서 hydrate됨
+-   Zustand store는 **클라이언트 전용** 상태 관리 라이브러리
+-   첫 DnD 시 서버 렌더링 결과와 클라이언트 상태 간 불일치 발생
+-   React가 hydration mismatch를 감지하고 컴포넌트를 재마운트
+-   이후 DnD부터는 이미 클라이언트 상태로 완전히 전환되어 정상 작동
 
 ### 해결 방법
 
@@ -552,7 +402,7 @@ Next.js App Router는 기본적으로 모든 컴포넌트를 **Server Component*
 
 ```typescript
 // src/components/dnd-grid/container.tsx
-"use client";
+'use client';
 
 export function DndGridContainer({ children, width, height }: Props) {
     // ... 기존 코드
@@ -561,7 +411,7 @@ export function DndGridContainer({ children, width, height }: Props) {
 
 ```typescript
 // src/components/dnd-grid/split.tsx
-"use client";
+'use client';
 
 export function DndGridSplit({ children, direction, ratio }: Props) {
     // ... 기존 코드
@@ -570,7 +420,7 @@ export function DndGridSplit({ children, direction, ratio }: Props) {
 
 ```typescript
 // src/components/dnd-grid/item.tsx
-"use client";
+'use client';
 
 export function DndGridItem({ children, id, top, left, width, height }: Props) {
     // ... 기존 코드
@@ -579,10 +429,17 @@ export function DndGridItem({ children, id, top, left, width, height }: Props) {
 
 ```typescript
 // src/components/dnd-grid/item-content.tsx
-"use client";
+'use client';
 
 export function ItemContent({ id, children }: Props) {
     // ... 기존 코드
 }
 ```
+
 ---
+
+## 참고 자료
+
+-   [React Reconciliation](https://react.dev/learn/preserving-and-resetting-state)
+-   [React Keys](https://react.dev/learn/rendering-lists#keeping-list-items-in-order-with-key)
+-   [React.cloneElement](https://react.dev/reference/react/cloneElement)
