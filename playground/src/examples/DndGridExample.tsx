@@ -83,7 +83,7 @@ export const RecentOrders = () => (
 
 export default function App() {
     return (
-        <DndGridContainer width={1200} height={800}>
+        <DndGridContainer width={600} height={600}>
             <DndGridSplit direction="horizontal" ratio={0.5}>
                 <DndGridSplit direction="vertical" ratio={0.5}>
                     <DndGridItem>
