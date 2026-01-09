@@ -34,7 +34,8 @@
         "docs:preview": "vitepress preview docs",
         "playground": "vite playground",
         "playground:build": "vite build playground",
-        "mcp:build": "cd mcp && npm run build"
+        "mcp:build": "cd mcp && npm run build",
+        "publish": "npm run build && npm version patch && npm publish"
     },
     "keywords": [
         "react",
