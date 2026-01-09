@@ -42,7 +42,7 @@ npm install zerojin
 #### 사용 방법
 
 ```bash
-dndgrid mcp를 사용해서 Sidebar, CodeEditor, Terminal 컴포넌트로 3-패널 IDE 레이아웃 생성해줘
+dndgrid mcp를 사용해서 UserStats, SalesChart,ActivityFeed,RecentOrders 2*2 레이아웃 생성해줘
 ```
 
 ### 생성 결과
@@ -56,28 +56,36 @@ import {
 
 function MyDashboard() {
     return (
-        <DndGridContainer width={1200} height={800}>
+        <DndGridContainer width={600} height={600}>
             <DndGridSplit direction="horizontal" ratio={0.5}>
-                <DndGridItem>
-                    <ItemDrag>
-                        <DndGridItemContent>
-                            <Sidebar />
-                        </DndGridItemContent>
-                    </ItemDrag>
-                </DndGridItem>
-
                 <DndGridSplit direction="vertical" ratio={0.5}>
                     <DndGridItem>
-                        <ItemDrag>
-                            <DndGridItemContent>
-                                <CodeEditor />
+                        <ItemDrag className="h-full">
+                            <DndGridItemContent className="h-full">
+                                <UserStats />
                             </DndGridItemContent>
                         </ItemDrag>
                     </DndGridItem>
                     <DndGridItem>
-                        <ItemDrag>
-                            <DndGridItemContent>
-                                <Terminal />
+                        <ItemDrag className="h-full">
+                            <DndGridItemContent className="h-full">
+                                <SalesChart />
+                            </DndGridItemContent>
+                        </ItemDrag>
+                    </DndGridItem>
+                </DndGridSplit>
+                <DndGridSplit direction="vertical" ratio={0.5}>
+                    <DndGridItem>
+                        <ItemDrag className="h-full">
+                            <DndGridItemContent className="h-full">
+                                <ActivityFeed />
+                            </DndGridItemContent>
+                        </ItemDrag>
+                    </DndGridItem>
+                    <DndGridItem>
+                        <ItemDrag className="h-full">
+                            <DndGridItemContent className="h-full">
+                                <RecentOrders />
                             </DndGridItemContent>
                         </ItemDrag>
                     </DndGridItem>
