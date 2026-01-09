@@ -18,7 +18,7 @@ export default function DndGrid() {
         <DndGridContainer width={800} height={600}>
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
-                    <DndGridItem>
+                    <DndGridItem className="z-50 bg-red-500">
                         <ItemDrag>
                             <DndGridItemContent>
                                 <AA />

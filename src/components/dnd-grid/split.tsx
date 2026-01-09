@@ -22,7 +22,13 @@ export function DndGridSplit({ children, ratio, id }: DndGridSplitProps) {
         throw new Error(`ratio must be between 0 and 1, got ${ratio}`);
     }
 
-    const [primary, secondary] = React.Children.toArray(children);
+    const childrenArray = React.Children.toArray(children);
+    if (childrenArray.length !== 2) {
+        throw new Error(
+            'DndGrid Split 컴포넌트는 두개의 children을 필수로 가져야 합니다.'
+        );
+    }
+    const [primary, secondary] = childrenArray;
 
     return (
         <div>
