@@ -357,7 +357,7 @@ CSS Variables를 활용하면 테마별로 쉽게 스타일을 변경할 수 있
 
 ### 상태 보존 (State Preservation)
 
-DndGrid는 내부적으로 **Flat Rendering** 전략을 사용합니다. 드래그 앤 드롭으로 인해 트리의 깊이나 구조가 바뀌어도, `DndGridItem` 내부에 있는 사용자 컴포넌트는 리마운트(Unmount & Remount)되지 않고 상태를 유지합니다.
+DndGrid는 내부적으로 **Flat Rendering** 전략을 사용합니다. 드래그 앤 드롭으로 인해 트리의 깊이나 구조가 바뀌어도, `DndGridItem` 내부에 있는 사용자 컴포넌트는 리마운트(Unmount & Remount)되지 않고 상태E를 유지합니다.
 
 ### Next.js (App Router) 지원
 
@@ -375,3 +375,5 @@ DndGrid는 클라이언트 측 인터랙션을 위해 브라우저 API와 상태
 ## 트러블 슈팅
 
 -   [dnd-grid-trouble](/api/components/dnd-grid-trouble)
+
+TODO: 실행 결과를 문서 페이지에 보여주기 해야함
