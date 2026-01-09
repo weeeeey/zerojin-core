@@ -376,4 +376,30 @@ DndGrid는 클라이언트 측 인터랙션을 위해 브라우저 API와 상태
 
 -   [dnd-grid-trouble](/api/components/dnd-grid-trouble)
 
-TODO: 실행 결과를 문서 페이지에 보여주기 해야함
+---
+
+## 실행 결과
+
+아래에서 DndGrid를 직접 사용해보세요. 패널을 드래그하여 레이아웃을 변경할 수 있습니다.
+
+<div class="playground-embed">
+  <iframe
+    src="/zerojin-core/playground/?example=DndGrid&standalone=true"
+    width="100%"
+    height="600"
+    frameborder="0"
+    title="DndGrid Interactive Example"
+    loading="lazy"
+  ></iframe>
+  <p class="playground-link">
+    <a href="/zerojin-core/playground/?example=DndGrid" target="_blank">
+      전체 화면으로 보기 ↗
+    </a>
+  </p>
+</div>
+
+:::tip 사용 팁
+-   각 패널을 클릭하여 카운터를 증가시켜 보세요
+-   패널을 다른 패널 위로 드래그하면 레이아웃이 자동으로 재구성됩니다
+-   레이아웃이 변경되어도 각 패널의 상태(카운터 값)는 유지됩니다
+:::

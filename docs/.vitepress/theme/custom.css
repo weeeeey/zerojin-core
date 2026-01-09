@@ -121,3 +121,48 @@
 .DocSearch {
   --docsearch-primary-color: var(--vp-c-brand-1) !important;
 }
+
+/**
+ * Component: Playground Embed
+ * -------------------------------------------------------------------------- */
+
+/* Playground iframe 임베드 스타일 */
+.playground-embed {
+  margin: 2rem 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--vp-c-bg-soft);
+}
+
+.playground-embed iframe {
+  display: block;
+  width: 100%;
+  border: none;
+  min-height: 600px;
+}
+
+.playground-link {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background: var(--vp-c-bg-soft);
+  border-top: 1px solid var(--vp-c-divider);
+  margin: 0;
+}
+
+.playground-link a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.playground-link a:hover {
+  text-decoration: underline;
+}
+
+/* 반응형: 모바일에서는 높이 조정 */
+@media (max-width: 768px) {
+  .playground-embed iframe {
+    min-height: 500px;
+  }
+}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DebounceExample from './examples/DebounceExample';
 import ThrottleExample from './examples/ThrottleExample';
 import LocalStorageExample from './examples/LocalStorageExample';
@@ -14,8 +14,41 @@ type Tab =
     | 'DndGrid';
 
 export default function App() {
-    const [activeTab, setActiveTab] = useState<Tab>('DndGrid');
+    // URL 쿼리 파라미터 읽기
+    const searchParams = new URLSearchParams(window.location.search);
+    const exampleParam = (searchParams.get('example') || 'DndGrid') as Tab;
+    const isStandalone = searchParams.get('standalone') === 'true';
 
+    const [activeTab, setActiveTab] = useState<Tab>(exampleParam);
+
+    // URL 동기화 (탭 변경 시)
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('example', activeTab);
+        if (isStandalone) {
+            url.searchParams.set('standalone', 'true');
+        }
+        window.history.replaceState({}, '', url.toString());
+    }, [activeTab, isStandalone]);
+
+    // Standalone 모드: 헤더/탭 없이 예제만 렌더링
+    if (isStandalone) {
+        return (
+            <div className="standalone-mode">
+                <main className="standalone-content">
+                    {activeTab === 'DndGrid' && <DndGridExample />}
+                    {activeTab === 'debounce' && <DebounceExample />}
+                    {activeTab === 'throttle' && <ThrottleExample />}
+                    {activeTab === 'localStorage' && <LocalStorageExample />}
+                    {activeTab === 'sessionStorage' && (
+                        <SessionStorageExample />
+                    )}
+                </main>
+            </div>
+        );
+    }
+
+    // 일반 모드: 전체 UI
     return (
         <div className="app">
             <header className="header">
