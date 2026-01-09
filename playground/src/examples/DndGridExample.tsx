@@ -15,7 +15,7 @@ function AA() {
 
 export default function DndGrid() {
     return (
-        <DndGridContainer width={1000} height={1000}>
+        <DndGridContainer width={800} height={600}>
             <DndGridSplit direction="horizontal" ratio={0.24}>
                 <DndGridSplit direction="vertical" ratio={0.6}>
                     <DndGridItem>
