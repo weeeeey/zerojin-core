@@ -86,12 +86,13 @@ export function DndGridItem({
             onMouseLeave={handleMouseLeave}
             className={cn(
                 'dnd-grid-item',
-                'absolute border border-black box-border ',
+                'border border-black box-border ',
                 isDragging ? 'bg-[#d0d0d0]  opacity-50 z-999' : 'z-0',
                 dropIndicatorClassName,
                 className
             )}
             style={{
+                position: 'absolute',
                 width: `${width}px`,
                 height: `${height}px`,
                 top: `${top}px`,
