@@ -9,7 +9,6 @@ import {
     DndSplitDirection,
 } from './types';
 
-
 /**
  * React children을 재귀적으로 파싱하여 ComponentNode 트리 구조로 변환 (이진 트리 ID 체계 사용)
  * @param node - 파싱할 React 노드
@@ -91,81 +90,7 @@ export function parseChildren(
         id: nodeId,
         children: props.children,
     };
-    // if (node.type === DndGridItem) {
-    // }
-
-    // // 알 수 없는 컴포넌트
-    // console.warn('Unknown component type:', node.type);
-    // return null;
 }
-
-/**
- * Tree에서 계산된 ID를 React children에 주입
- * @param reactNode - React 노드
- * @param treeNode - 계산된 ID를 가진 Tree 노드
- * @param options - 컴포넌트 타입 판별을 위한 옵션
- * @returns ID props가 주입된 React 노드
- */
-// export function injectLayoutToChildren(
-//     reactNode: React.ReactNode,
-//     treeNode: any, // ChildNode 타입 (GridItem | GridSplit)
-//     options: ParseChildrenOptions
-// ): React.ReactNode {
-//     const { DndGridSplit, DndGridItem } = options;
-
-//     if (!React.isValidElement(reactNode)) {
-//         return reactNode;
-//     }
-
-//     // DndGridItem인 경우 - id, top, left, width, height, children 주입
-//     if (reactNode.type === DndGridItem) {
-//         const props = reactNode.props as { children?: React.ReactNode };
-//         const itemProps = {
-//             id: treeNode.id,
-//             top: treeNode.top,
-//             left: treeNode.left,
-//             width: treeNode.width,
-//             height: treeNode.height,
-//             children: props.children, // 원본 children 유지
-//         };
-//         return React.cloneElement(reactNode, itemProps as any);
-//     }
-
-//     // DndGridSplit인 경우 - id만 주입
-//     const idProps = {
-//         id: treeNode.id,
-//     };
-
-//     // DndGridSplit인 경우
-//     if (reactNode.type === DndGridSplit && treeNode.type === 'split') {
-//         const props = reactNode.props as { children: React.ReactNode };
-//         const childrenArray = React.Children.toArray(props.children);
-
-//         if (childrenArray.length !== 2) {
-//             console.warn('DndGridSplit should have exactly 2 children');
-//             return reactNode;
-//         }
-
-//         return React.cloneElement(reactNode, {
-//             ...idProps,
-//             children: [
-//                 injectLayoutToChildren(
-//                     childrenArray[0],
-//                     treeNode.primaryChild,
-//                     options
-//                 ),
-//                 injectLayoutToChildren(
-//                     childrenArray[1],
-//                     treeNode.secondaryChild,
-//                     options
-//                 ),
-//             ],
-//         } as any);
-//     }
-
-//     return reactNode;
-// }
-
 
 export const getQuadrantPosition = ({
     mouseX,
@@ -243,93 +168,102 @@ export function collectAllItems(treeNode: ChildNode): ChildNode[] {
 }
 
 /**
- * Tree 노드로부터 React 컴포넌트 트리를 생성 (원본 엘리먼트 참조 보존)
- * DnD로 구조가 변경되어도 tree.root의 실제 구조를 반영한 React 트리 생성
- * cloneElement를 사용하여 원본 엘리먼트 참조를 유지하고 layout props만 업데이트
- * @param treeNode - Tree의 ChildNode
- * @param options - 컴포넌트 타입
- * @returns React 노드
+ * 클릭된 요소가 인터랙티브 요소인지 확인 (드래그를 시작하지 말아야 하는지)
+ *
+ * 이 함수는 DOM 트리를 상위로 순회하면서 클릭된 요소 또는 그 부모가
+ * 버튼, 입력 필드, 링크 등 인터랙티브 요소인지 검사합니다.
+ *
+ * @param target - 클릭된 요소 (event.target)
+ * @param dragContainer - 드래그 컨테이너 루트 요소 (순회 제한용)
+ * @returns 드래그를 막아야 하면 true, 드래그를 시작해야 하면 false
+ *
+ * @example
+ * ```tsx
+ * const handleMouseDown = (e: React.MouseEvent) => {
+ *     if (isInteractiveElement(e.target, containerRef.current)) {
+ *         return; // 인터랙티브 요소이므로 드래그 시작하지 않음
+ *     }
+ *     // 드래그 시작...
+ * };
+ * ```
  */
-// export function buildReactTreeFromNode(
-//     treeNode: ChildNode,
-//     options: ParseChildrenOptions
-// ): React.ReactNode {
-//     const { DndGridSplit, DndGridItem } = options;
+export function isInteractiveElement(
+    target: EventTarget | null,
+    dragContainer: HTMLElement | null
+): boolean {
+    // EventTarget이 아니거나 HTMLElement가 아닌 경우
+    if (!target || !(target instanceof HTMLElement)) {
+        return false;
+    }
 
-//     if (!treeNode) return null;
+    let currentElement: HTMLElement | null = target;
 
-//     const getElementFromCache = useTreeStore.getState().getElementFromCache;
-//     const getChildrenFromCache = useTreeStore.getState().getChildrenFromCache;
+    // dragContainer에 도달할 때까지 DOM 트리를 상위로 순회
+    while (currentElement && currentElement !== dragContainer) {
+        // disabled 또는 aria-disabled 요소는 인터랙티브가 아님
+        if (
+            currentElement.hasAttribute('disabled') ||
+            currentElement.getAttribute('aria-disabled') === 'true'
+        ) {
+            currentElement = currentElement.parentElement;
+            continue;
+        }
 
-//     // Item 노드인 경우
-//     if (treeNode.type === 'item') {
-//         const cachedElement = getElementFromCache(treeNode.id);
-//         const cachedChildren = getChildrenFromCache(treeNode.id);
+        // 1. 표준 HTML 인터랙티브 요소 확인
+        const tagName = currentElement.tagName.toLowerCase();
+        const interactiveTags = [
+            'button',
+            'input',
+            'textarea',
+            'select',
+            'option',
+            'a',
+            'label',
+        ];
+        if (interactiveTags.includes(tagName)) {
+            return true;
+        }
 
-//         // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
-//         if (cachedElement) {
-//             return React.cloneElement(cachedElement, {
-//                 key: treeNode.id,
-//                 id: treeNode.id,
-//                 top: treeNode.top,
-//                 left: treeNode.left,
-//                 width: treeNode.width,
-//                 height: treeNode.height,
-//                 children: cachedChildren ?? treeNode.children,
-//             } as any);
-//         }
+        // 2. contenteditable 속성 확인
+        const contentEditable = currentElement.getAttribute('contenteditable');
+        if (contentEditable === 'true' || contentEditable === '') {
+            return true;
+        }
 
-//         // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
-//         return React.createElement(DndGridItem, {
-//             key: treeNode.id,
-//             id: treeNode.id,
-//             top: treeNode.top,
-//             left: treeNode.left,
-//             width: treeNode.width,
-//             height: treeNode.height,
-//             children: cachedChildren ?? treeNode.children,
-//         });
-//     }
+        // 3. ARIA role 확인
+        const role = currentElement.getAttribute('role');
+        const interactiveRoles = [
+            'button',
+            'link',
+            'textbox',
+            'combobox',
+            'listbox',
+            'searchbox',
+            'spinbutton',
+            'slider',
+            'switch',
+            'tab',
+            'menuitem',
+            'menuitemcheckbox',
+            'menuitemradio',
+        ];
+        if (role && interactiveRoles.includes(role)) {
+            return true;
+        }
 
-//     // Split 노드인 경우
-//     if (treeNode.type === 'split') {
-//         const primaryChild = buildReactTreeFromNode(
-//             treeNode.primaryChild,
-//             options
-//         );
-//         const secondaryChild = buildReactTreeFromNode(
-//             treeNode.secondaryChild,
-//             options
-//         );
+        // 4. tabindex 확인 (>= 0인 경우 키보드 포커스 가능한 요소)
+        const tabindex = currentElement.getAttribute('tabindex');
+        if (tabindex !== null) {
+            const tabindexValue = parseInt(tabindex, 10);
+            if (!isNaN(tabindexValue) && tabindexValue >= 0) {
+                return true;
+            }
+        }
 
-//         const cachedElement = getElementFromCache(treeNode.id);
+        // 부모 요소로 이동
+        currentElement = currentElement.parentElement;
+    }
 
-//         // 원본 엘리먼트가 있으면 cloneElement로 참조 유지
-//         if (cachedElement) {
-//             return React.cloneElement(
-//                 cachedElement,
-//                 {
-//                     key: treeNode.id,
-//                     id: treeNode.id,
-//                     direction: treeNode.direction,
-//                     ratio: treeNode.ratio,
-//                 } as any,
-//                 [primaryChild, secondaryChild]
-//             );
-//         }
-
-//         // fallback: 원본이 없으면 createElement (초기 렌더링시에만 발생)
-//         return React.createElement(
-//             DndGridSplit,
-//             {
-//                 key: treeNode.id,
-//                 id: treeNode.id,
-//                 direction: treeNode.direction,
-//                 ratio: treeNode.ratio,
-//             },
-//             [primaryChild, secondaryChild]
-//         );
-//     }
-
-//     return null;
-// }
+    // 인터랙티브 요소를 찾지 못함
+    return false;
+}

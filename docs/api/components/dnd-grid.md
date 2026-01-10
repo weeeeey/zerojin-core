@@ -195,6 +195,118 @@ function MyDashboard() {
 </DndGridItem>
 ```
 
+### 인터랙티브 요소 처리
+
+#### 자동 감지 기능
+
+DndGrid는 버튼, 입력 필드, 링크 등의 인터랙티브 요소를 클릭할 때 자동으로 드래그를 시작하지 않습니다. 다음 요소들은 자동으로 감지됩니다:
+
+**표준 HTML 요소**:
+
+-   `<button>`, `<input>`, `<textarea>`, `<select>`, `<a>`, `<label>`
+-   `contenteditable` 속성이 있는 요소
+
+**ARIA Roles**:
+
+-   `role="button"`, `role="link"`, `role="textbox"`, `role="combobox"` 등
+-   전체 목록: button, link, textbox, combobox, listbox, searchbox, spinbutton, slider, switch, tab, menuitem, menuitemcheckbox, menuitemradio
+
+**기타**:
+
+-   `tabindex >= 0` 인 요소 (키보드 포커스 가능)
+
+#### 기본 사용법
+
+표준 인터랙티브 요소는 추가 코드 없이 바로 작동합니다:
+
+```tsx
+<DndGridItem>
+    <ItemDrag className="h-full">
+        <DndGridItemContent className="h-full">
+            {/* ✅ 이 버튼들은 자동으로 작동합니다 */}
+            <button onClick={handleClick}>클릭 가능</button>
+            <input type="text" placeholder="입력 가능" />
+            <a href="#">링크 클릭 가능</a>
+        </DndGridItemContent>
+    </ItemDrag>
+</DndGridItem>
+```
+
+:::tip 장점
+이전에는 각 버튼마다 `onMouseDown={(e) => e.stopPropagation()}`을 작성해야 했지만, 이제는 자동으로 처리됩니다!
+:::
+
+#### 커스텀 인터랙티브 요소
+
+ARIA role이 없는 커스텀 인터랙티브 요소는 자동으로 감지되지 않습니다. 두 가지 해결 방법이 있습니다:
+
+**방법 1: ARIA Role 추가 (권장)**
+
+접근성을 위해 적절한 ARIA role을 추가하세요:
+
+```tsx
+<DndGridItem>
+    <ItemDrag className="h-full">
+        <DndGridItemContent className="h-full">
+            {/* ✅ role="button"으로 자동 감지됨 */}
+            <div
+                role="button"
+                onClick={handleClick}
+                className="cursor-pointer"
+            >
+                커스텀 버튼
+            </div>
+        </DndGridItemContent>
+    </ItemDrag>
+</DndGridItem>
+```
+
+**방법 2: stopPropagation 사용 (대안)**
+
+ARIA role을 추가할 수 없는 경우, 이벤트 전파를 수동으로 막을 수 있습니다:
+
+```tsx
+<DndGridItem>
+    <ItemDrag className="h-full">
+        <DndGridItemContent className="h-full">
+            {/* ⚠️ stopPropagation으로 수동 처리 */}
+            <div
+                onClick={handleClick}
+                onMouseDown={(e) => e.stopPropagation()}
+                className="cursor-pointer"
+            >
+                커스텀 버튼
+            </div>
+        </DndGridItemContent>
+    </ItemDrag>
+</DndGridItem>
+```
+
+:::warning 주의
+`onMouseDown={(e) => e.stopPropagation()}`은 접근성을 고려하지 않으므로 가능하면 **방법 1 (ARIA role 사용)**을 권장합니다.
+
+ARIA role을 사용하면:
+
+-   스크린 리더 사용자가 요소의 역할을 이해할 수 있습니다
+-   키보드 내비게이션이 개선됩니다
+-   시맨틱 HTML을 준수하게 됩니다
+    :::
+
+#### 비활성 요소
+
+`disabled` 속성이나 `aria-disabled="true"`가 설정된 요소는 인터랙티브로 간주되지 않으며, 드래그가 가능합니다:
+
+```tsx
+{
+    /* 비활성 버튼 위에서 드래그 가능 */
+}
+<button disabled>비활성 버튼</button>;
+```
+
+더 자세한 트러블슈팅은 [DndGrid 트러블슈팅 가이드](/api/components/dnd-grid-trouble)를 참조하세요.
+
+---
+
 ### `DndGridItemContent`
 
 DragGridItem 내부에 있어야 하는 컴포넌트로 렌더링 될 ui를 감싸는 형태입니다.

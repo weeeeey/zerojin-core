@@ -9,12 +9,15 @@ import {
 
 export const UserStats = () => {
     const [a, aa] = useState(0);
+
     return (
         <div className="flex flex-col items-center justify-center h-full bg-blue-100 p-4 border rounded">
             <h2 className="text-xl font-bold">리렌더링 체크</h2>
             <div className="flex gap-x-4">
                 <button
-                    onClick={() => aa((v) => v + 1)}
+                    onClick={() => {
+                        aa((v) => v + 1);
+                    }}
                     className="rounded-md bg-blue-400"
                 >
                     증가 버튼

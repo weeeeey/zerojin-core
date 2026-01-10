@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import { cn } from '../../../lib/util';
 import { useTreeStore } from './actions/store';
-import { getQuadrantPosition } from './actions/util';
+import { getQuadrantPosition, isInteractiveElement } from './actions/util';
 
 export interface ItemDragProps {
     id?: number;
@@ -20,8 +20,16 @@ export function ItemDrag({ id, children, className }: ItemDragProps) {
 
     const itemDragRef = useRef<HTMLDivElement>(null);
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (e: React.MouseEvent) => {
         if (!id) return;
+
+        // 인터랙티브 요소 (버튼, 입력 필드 등) 클릭 시 드래그 시작하지 않음
+        if (isInteractiveElement(e.target, itemDragRef.current)) {
+            return;
+        }
+
+        e.stopPropagation();
+        console.log('');
 
         startDrag(id);
 
