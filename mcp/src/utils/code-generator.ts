@@ -1,31 +1,36 @@
-import type { LayoutTree, LayoutNode, LayoutSplit, LayoutItem } from '../types/layout.js';
+import type {
+    LayoutTree,
+    LayoutNode,
+    LayoutSplit,
+    LayoutItem,
+} from '../types/layout.js';
 
 export interface GenerateOptions {
-  framework: 'react' | 'nextjs-app' | 'nextjs-pages';
-  width: number;
-  height: number;
-  componentPrefix?: string;
+    framework: 'react' | 'nextjs-app' | 'nextjs-pages';
+    width: number;
+    height: number;
+    componentPrefix?: string;
 }
 
 /**
  * Generates TypeScript/JSX code from LayoutTree
  */
 export class CodeGenerator {
-  private options: GenerateOptions;
+    private options: GenerateOptions;
 
-  constructor(options: GenerateOptions) {
-    this.options = options;
-  }
+    constructor(options: GenerateOptions) {
+        this.options = options;
+    }
 
-  /**
-   * Generate complete component code
-   */
-  generate(layout: LayoutTree): string {
-    const useClient = this.shouldAddUseClient();
-    const imports = this.generateImports();
-    const jsx = this.generateJSX(layout.child, 2);
+    /**
+     * Generate complete component code
+     */
+    generate(layout: LayoutTree): string {
+        const useClient = this.shouldAddUseClient();
+        const imports = this.generateImports();
+        const jsx = this.generateJSX(layout.child, 2);
 
-    const code = `${useClient}${imports}
+        const code = `${useClient}${imports}
 
 export default function DndGridLayout() {
   return (
@@ -36,94 +41,97 @@ ${jsx}
 }
 `;
 
-    return this.formatCode(code);
-  }
-
-  /**
-   * Check if "use client" directive is needed
-   */
-  private shouldAddUseClient(): string {
-    if (this.options.framework === 'nextjs-app') {
-      return '"use client";\n\n';
-    }
-    return '';
-  }
-
-  /**
-   * Generate import statements
-   */
-  private generateImports(): string {
-    const imports: string[] = [];
-
-    // DndGrid components import
-    imports.push(
-      `import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent, ItemDrag } from 'zerojin/components';`
-    );
-
-    return imports.join('\n');
-  }
-
-  /**
-   * Generate JSX for a layout node
-   */
-  private generateJSX(node: LayoutNode, indent: number): string {
-    const spaces = ' '.repeat(indent);
-
-    if (node.type === 'item') {
-      return this.generateItemJSX(node, indent);
+        return this.formatCode(code);
     }
 
-    return this.generateSplitJSX(node, indent);
-  }
+    /**
+     * Check if "use client" directive is needed
+     */
+    private shouldAddUseClient(): string {
+        if (this.options.framework === 'nextjs-app') {
+            return '"use client";\n\n';
+        }
+        return '';
+    }
 
-  /**
-   * Generate JSX for a GridItem
-   */
-  private generateItemJSX(node: LayoutItem, indent: number): string {
-    const spaces = ' '.repeat(indent);
-    const dragSpaces = ' '.repeat(indent + 2);
-    const contentSpaces = ' '.repeat(indent + 4);
-    const componentSpaces = ' '.repeat(indent + 6);
-    const componentName = this.options.componentPrefix
-      ? `${this.options.componentPrefix}${node.component}`
-      : node.component;
+    /**
+     * Generate import statements
+     */
+    private generateImports(): string {
+        const imports: string[] = [];
 
-    return `${spaces}<DndGridItem>
+        // DndGrid components import
+        imports.push(
+            `import { DndGridContainer, DndGridSplit, DndGridItem, DndGridItemContent, ItemDrag } from 'zerojin/components';`
+        );
+
+        return imports.join('\n');
+    }
+
+    /**
+     * Generate JSX for a layout node
+     */
+    private generateJSX(node: LayoutNode, indent: number): string {
+        // const spaces = ' '.repeat(indent);
+
+        if (node.type === 'item') {
+            return this.generateItemJSX(node, indent);
+        }
+
+        return this.generateSplitJSX(node, indent);
+    }
+
+    /**
+     * Generate JSX for a GridItem
+     */
+    private generateItemJSX(node: LayoutItem, indent: number): string {
+        const spaces = ' '.repeat(indent);
+        const dragSpaces = ' '.repeat(indent + 2);
+        const contentSpaces = ' '.repeat(indent + 4);
+        const componentSpaces = ' '.repeat(indent + 6);
+        const componentName = this.options.componentPrefix
+            ? `${this.options.componentPrefix}${node.component}`
+            : node.component;
+
+        return `${spaces}<DndGridItem>
 ${dragSpaces}<ItemDrag>
 ${contentSpaces}<DndGridItemContent>
 ${componentSpaces}<${componentName} />
 ${contentSpaces}</DndGridItemContent>
 ${dragSpaces}</ItemDrag>
 ${spaces}</DndGridItem>`;
-  }
+    }
 
-  /**
-   * Generate JSX for a GridSplit
-   */
-  private generateSplitJSX(node: LayoutSplit, indent: number): string {
-    const spaces = ' '.repeat(indent);
-    const primaryJSX = this.generateJSX(node.primary, indent + 2);
-    const secondaryJSX = this.generateJSX(node.secondary, indent + 2);
+    /**
+     * Generate JSX for a GridSplit
+     */
+    private generateSplitJSX(node: LayoutSplit, indent: number): string {
+        const spaces = ' '.repeat(indent);
+        const primaryJSX = this.generateJSX(node.primary, indent + 2);
+        const secondaryJSX = this.generateJSX(node.secondary, indent + 2);
 
-    return `${spaces}<DndGridSplit direction="${node.direction}" ratio={${node.ratio}}>
+        return `${spaces}<DndGridSplit direction="${node.direction}" ratio={${node.ratio}}>
 ${primaryJSX}
 ${secondaryJSX}
 ${spaces}</DndGridSplit>`;
-  }
+    }
 
-  /**
-   * Format generated code
-   */
-  private formatCode(code: string): string {
-    // Basic formatting - can be enhanced with prettier later
-    return code.trim() + '\n';
-  }
+    /**
+     * Format generated code
+     */
+    private formatCode(code: string): string {
+        // Basic formatting - can be enhanced with prettier later
+        return code.trim() + '\n';
+    }
 }
 
 /**
  * Helper function to quickly generate code
  */
-export function generateCode(layout: LayoutTree, options: GenerateOptions): string {
-  const generator = new CodeGenerator(options);
-  return generator.generate(layout);
+export function generateCode(
+    layout: LayoutTree,
+    options: GenerateOptions
+): string {
+    const generator = new CodeGenerator(options);
+    return generator.generate(layout);
 }

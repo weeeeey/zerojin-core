@@ -72,6 +72,19 @@ export default defineConfig({
                                 text: 'useBroadcastChannel',
                                 link: '/api/hooks/useBroadcastChannel',
                             },
+                            {
+                                text: 'useMediaQuery',
+                                link: '/api/hooks/useMediaQuery',
+                            },
+
+                            {
+                                text: 'useIsMobile',
+                                link: '/api/hooks/useIsMobile',
+                            },
+                            {
+                                text: 'useIsMounted',
+                                link: '/api/hooks/useIsMounted',
+                            },
                         ],
                     },
                 ],
