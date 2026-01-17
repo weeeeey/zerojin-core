@@ -20,7 +20,7 @@ export function DndGridContainer({
     const buildTree = useTreeStore((state) => state.buildTree);
     const setContainerRef = useTreeStore((state) => state.setContainerRef);
     const resetWillRerenderNodes = useTreeStore(
-        (state) => state.resetWillRerenderNodes
+        (state) => state.resetWillRerenderNodes,
     );
     const willRerenderNodes = useTreeStore((state) => state.willRerenderNodes);
     const containerRef = useRef<HTMLDivElement>(null);

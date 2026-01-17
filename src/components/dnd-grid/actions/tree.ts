@@ -1,11 +1,16 @@
-import { ComponentNode, DropQuadrant, NodeType, DndSplitDirection, NodeSnapshot } from './types';
+import {
+    ComponentNode,
+    DropQuadrant,
+    NodeType,
+    DndSplitDirection,
+    NodeSnapshot,
+} from './types';
 import { getSplitDirection } from './util';
 import React from 'react';
 
 export type ChildNode = GridItem | GridSplit;
 
 type ParentWithCurrent = { node: ChildNode; parent: GridSplit | null };
-
 
 /**
  * 노드를 복제하여 새로운 객체 참조를 생성합니다.
@@ -26,7 +31,7 @@ export function cloneNode(node: ChildNode): ChildNode {
             node.direction,
             node.ratio,
             node.primaryChild,
-            node.secondaryChild
+            node.secondaryChild,
         );
         cloned.width = node.width;
         cloned.height = node.height;
@@ -200,7 +205,7 @@ export class GridSplit extends BaseNode {
         direction: DndSplitDirection,
         ratio: number,
         primaryChild: ChildNode,
-        secondaryChild: ChildNode
+        secondaryChild: ChildNode,
     ) {
         super(id);
         this._direction = direction;
@@ -308,7 +313,7 @@ export class Tree {
     constructor(
         containerWidth: number,
         containerHeight: number,
-        componentsRootNode: ComponentNode
+        componentsRootNode: ComponentNode,
     ) {
         // 1단계: 트리 구조만 생성
         this._root = this.buildFromComponentNode(componentsRootNode);
@@ -349,7 +354,7 @@ export class Tree {
                 node.direction!,
                 node.ratio!,
                 primary,
-                secondary
+                secondary,
             );
         }
     }
@@ -384,7 +389,7 @@ export class Tree {
     private generateNewSplitNode(
         dragged: ChildNode,
         hovered: ChildNode,
-        dropQuadrant: DropQuadrant
+        dropQuadrant: DropQuadrant,
     ) {
         const directon = getSplitDirection(dropQuadrant);
         let primary = dragged;
@@ -398,14 +403,14 @@ export class Tree {
             directon,
             0.5,
             primary,
-            secondary
+            secondary,
         );
     }
 
     private findNodeWithParent(
         targetId: number,
         current: ChildNode = this._root,
-        parent: GridSplit | null = null
+        parent: GridSplit | null = null,
     ): ParentWithCurrent | null {
         if (current.id === targetId) {
             return { node: current, parent };
@@ -415,14 +420,14 @@ export class Tree {
             const foundInPrimary = this.findNodeWithParent(
                 targetId,
                 current.primaryChild,
-                current
+                current,
             );
             if (foundInPrimary) return foundInPrimary;
 
             const foundInSecondary = this.findNodeWithParent(
                 targetId,
                 current.secondaryChild,
-                current
+                current,
             );
             if (foundInSecondary) return foundInSecondary;
         }
@@ -436,7 +441,7 @@ export class Tree {
     private swapSiblings(
         parent: GridSplit,
         dragged: GridItem,
-        dropQuadrant: DropQuadrant
+        dropQuadrant: DropQuadrant,
     ): void {
         const isDraggedPrimary = parent.primaryChild.id === dragged.id;
         const direction = getSplitDirection(dropQuadrant);
@@ -580,7 +585,7 @@ export class Tree {
     restructureByDrop(
         draggedItemId: number,
         hoveredItemId: number,
-        dropQuadrant: DropQuadrant
+        dropQuadrant: DropQuadrant,
     ) {
         const dragged = this.findNodeWithParent(draggedItemId);
         const hovered = this.findNodeWithParent(hoveredItemId);
@@ -593,7 +598,7 @@ export class Tree {
             this.swapSiblings(
                 dragged.parent,
                 dragged.node as GridItem,
-                dropQuadrant
+                dropQuadrant,
             );
 
             if (this._root.type === 'split') {
@@ -606,7 +611,7 @@ export class Tree {
         const newSplitNode = this.generateNewSplitNode(
             dragged.node,
             hovered.node,
-            dropQuadrant
+            dropQuadrant,
         );
 
         // 3단계: hovered 부모에 새 Split 연결
@@ -618,12 +623,12 @@ export class Tree {
 
         // 4단계: dragged 형제 승격
         const { parent: draggedGrandParent } = this.findNodeWithParent(
-            dragged.parent.id
+            dragged.parent.id,
         )!;
         // grandParent가 루트인 경우
 
         const siblingDragNode = dragged.parent.isPrimaryChildren(
-            dragged.node.id
+            dragged.node.id,
         )
             ? dragged.parent.secondaryChild
             : dragged.parent.primaryChild;

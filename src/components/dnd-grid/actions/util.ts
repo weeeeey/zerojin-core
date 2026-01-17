@@ -19,7 +19,7 @@ import {
 export function parseChildren(
     node: React.ReactNode,
     options: ParseChildrenOptions,
-    parentId: number = 0
+    parentId: number = 0,
 ): ComponentNode | null {
     const { DndGridSplit } = options;
 
@@ -42,7 +42,7 @@ export function parseChildren(
 
         if (childrenArray.length !== 2) {
             console.warn(
-                `DndGridSplit expects exactly 2 children, got ${childrenArray.length}`
+                `DndGridSplit expects exactly 2 children, got ${childrenArray.length}`,
             );
             return null;
         }
@@ -51,7 +51,7 @@ export function parseChildren(
         const secondary = parseChildren(
             childrenArray[1],
             options,
-            nodeId * 2 + 1
+            nodeId * 2 + 1,
         );
 
         if (!primary || !secondary) {
@@ -101,11 +101,11 @@ export const getQuadrantPosition = ({
     width,
 }: CalculateQuadrantProps): DropQuadrant => {
     const inclineY = Math.round(
-        ((startLeft - mouseX) * height) / width + startTop + height
+        ((startLeft - mouseX) * height) / width + startTop + height,
     );
 
     const declineY = Math.round(
-        ((mouseX - startLeft) * height) / width + startTop
+        ((mouseX - startLeft) * height) / width + startTop,
     );
 
     // console.log(`inc:${inclineY}, dec:${declineY},cur:${mouseY}`);
@@ -153,7 +153,6 @@ export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
  */
 export function collectAllItems(treeNode: ChildNode): ChildNode[] {
     const items: ChildNode[] = [];
-
     const traverse = (node: ChildNode) => {
         if (node.type === 'item') {
             items.push(node);
@@ -165,6 +164,11 @@ export function collectAllItems(treeNode: ChildNode): ChildNode[] {
 
     traverse(treeNode);
     return items;
+
+    // return {
+    //     items,
+    //     splits
+    // }
 }
 
 /**
@@ -189,7 +193,7 @@ export function collectAllItems(treeNode: ChildNode): ChildNode[] {
  */
 export function isInteractiveElement(
     target: EventTarget | null,
-    dragContainer: HTMLElement | null
+    dragContainer: HTMLElement | null,
 ): boolean {
     // EventTarget이 아니거나 HTMLElement가 아닌 경우
     if (!target || !(target instanceof HTMLElement)) {

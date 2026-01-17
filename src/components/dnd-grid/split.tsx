@@ -13,7 +13,7 @@ interface DndGridSplitProps {
 
 export function DndGridSplit({ children, ratio, id }: DndGridSplitProps) {
     const node = useTreeStore((state) =>
-        id ? state.nodes.get(id) : undefined
+        id ? state.nodes.get(id) : undefined,
     );
 
     if (!node) return null;
@@ -25,7 +25,7 @@ export function DndGridSplit({ children, ratio, id }: DndGridSplitProps) {
     const childrenArray = React.Children.toArray(children);
     if (childrenArray.length !== 2) {
         throw new Error(
-            'DndGrid Split 컴포넌트는 두개의 children을 필수로 가져야 합니다.'
+            'DndGrid Split 컴포넌트는 두개의 children을 필수로 가져야 합니다.',
         );
     }
     const [primary, secondary] = childrenArray;

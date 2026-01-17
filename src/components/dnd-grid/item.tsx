@@ -29,14 +29,16 @@ export function DndGridItem({
     dropIndicatorClassName,
     children,
 }: DndGridItemProps) {
-    const isDragging = useTreeStore((state) => state.draggedItemId === id);
+    const translate = useTreeStore((state) =>
+        state.draggedItemId === id ? state.translates : null,
+    );
+
     const isHovered = useTreeStore(
-        (state) => state.hoveredItemId === id && state.draggedItemId !== id
+        (state) => state.hoveredItemId === id && state.draggedItemId !== id,
     );
     const dropQuadrant = useTreeStore((state) =>
-        state.hoveredItemId === id ? state.dropQuadrant : null
+        state.hoveredItemId === id ? state.dropQuadrant : null,
     );
-    const translate = useTreeStore((state) => state.translates);
 
     const setHoveredItem = useTreeStore((state) => state.setHoveredItem);
 
@@ -75,7 +77,7 @@ export function DndGridItem({
 
                 return child;
             }),
-        [children, id]
+        [children, id],
     );
 
     return (
@@ -87,9 +89,9 @@ export function DndGridItem({
             className={cn(
                 'dnd-grid-item',
                 'border border-black box-border ',
-                isDragging ? 'bg-[#d0d0d0]  opacity-50 z-999' : 'z-0',
+                translate ? 'bg-[#d0d0d0]  opacity-50 z-999' : 'z-0',
                 dropIndicatorClassName,
-                className
+                className,
             )}
             style={{
                 position: 'absolute',
@@ -97,7 +99,7 @@ export function DndGridItem({
                 height: `${height}px`,
                 top: `${top}px`,
                 left: `${left}px`,
-                transform: isDragging
+                transform: translate
                     ? `translate(${translate.x}px, ${translate.y}px)`
                     : `translate(0px, 0px)`,
             }}
