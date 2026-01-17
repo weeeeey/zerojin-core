@@ -7,21 +7,21 @@
 
 /* 2. 각 방향별 외부 그림자 설정 */
 .dnd-grid-item[data-drop-quadrant='top'] {
-    /* Y축을 음수(-5px)로 주어 위쪽 외부로 생성 */
-    box-shadow: 0 -5px 10px -2px red;
+    /* Y축을 음수(-12px)로 주어 위쪽 외부로 생성 */
+    box-shadow: 0 -12px 10px -8px red;
 }
 
 .dnd-grid-item[data-drop-quadrant='left'] {
-    /* X축을 음수(-5px)로 주어 왼쪽 외부로 생성 */
-    box-shadow: -5px 0 10px -2px red;
+    /* X축을 음수(-12px)로 주어 왼쪽 외부로 생성 */
+    box-shadow: -12px 0 10px -8px red;
 }
 
 .dnd-grid-item[data-drop-quadrant='right'] {
-    /* X축을 양수(5px)로 주어 오른쪽 외부로 생성 */
-    box-shadow: 5px 0 10px -2px red;
+    /* X축을 양수(12px)로 주어 오른쪽 외부로 생성 */
+    box-shadow: 12px 0 10px -8px red;
 }
 
 .dnd-grid-item[data-drop-quadrant='bottom'] {
-    /* Y축을 양수(5px)로 주어 아래쪽 외부로 생성 */
-    box-shadow: 0 5px 10px -2px red;
+    /* Y축을 양수(12px)로 주어 아래쪽 외부로 생성 */
+    box-shadow: 0 12px 10px -8px red;
 }
