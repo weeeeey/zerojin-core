@@ -48,26 +48,13 @@ export function DndGridContainer({
         const currentTree = useTreeStore.getState().tree;
         if (!currentTree) return;
 
-        const items = collectAllItems(currentTree.root);
-        const getElementFromCache = useTreeStore.getState().getElementFromCache;
+        const { items, splits } = collectAllItems(currentTree.root);
+
         const getChildrenFromCache =
             useTreeStore.getState().getChildrenFromCache;
 
         const renderedItems = items.map((item) => {
-            const cachedElement = getElementFromCache(item.id);
             const cachedChildren = getChildrenFromCache(item.id);
-
-            if (cachedElement) {
-                return React.cloneElement(cachedElement, {
-                    key: item.id,
-                    id: item.id,
-                    top: item.top,
-                    left: item.left,
-                    width: item.width,
-                    height: item.height,
-                    children: cachedChildren,
-                } as any);
-            }
 
             return React.createElement(DndGridItem, {
                 key: item.id,

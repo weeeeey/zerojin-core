@@ -59,10 +59,6 @@ export function parseChildren(
             return null;
         }
 
-        // 원본 Split 엘리먼트를 캐시에 저장
-        const saveElementToCache = useTreeStore.getState().saveElementToCache;
-        saveElementToCache(nodeId, node);
-
         return {
             type: 'split',
             id: nodeId,
@@ -78,9 +74,7 @@ export function parseChildren(
 
     // 원본 Item 엘리먼트와 children을 캐시에 저장
     const saveChildrenToCache = useTreeStore.getState().saveChildrenToCache;
-    const saveElementToCache = useTreeStore.getState().saveElementToCache;
 
-    saveElementToCache(nodeId, node);
     if (props.children) {
         saveChildrenToCache(nodeId, props.children);
     }
@@ -151,24 +145,28 @@ export function getSplitDirection(quadrant: DropQuadrant): DndSplitDirection {
  * @param treeNode - Tree의 루트 노드
  * @returns 모든 Item 노드의 배열
  */
-export function collectAllItems(treeNode: ChildNode): ChildNode[] {
+export function collectAllItems(treeNode: ChildNode): {
+    items: ChildNode[];
+    splits: ChildNode[];
+} {
     const items: ChildNode[] = [];
+    const splits: ChildNode[] = [];
     const traverse = (node: ChildNode) => {
         if (node.type === 'item') {
             items.push(node);
         } else if (node.type === 'split') {
+            splits.push(node);
             traverse(node.primaryChild);
             traverse(node.secondaryChild);
         }
     };
 
     traverse(treeNode);
-    return items;
 
-    // return {
-    //     items,
-    //     splits
-    // }
+    return {
+        items,
+        splits,
+    };
 }
 
 /**
